@@ -1,4 +1,5 @@
 #+title: TODOs
 
-* TODO Introduce GNU build system
+* DONE Introduce GNU build system
+  CLOSED: [2024-06-23 Sun 15:09]
 
