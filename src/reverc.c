@@ -122,3 +122,77 @@ void reverc_make_move(Reverc_Context *ctx, size_t move_number)
 	ctx->is_black = !ctx->is_black;
 	calculate_moves(ctx);
 }
+
+bool reverc_context_report(Reverc_Context ctx)
+{
+	printf("┌");
+	for (size_t i = 0; i < REVERC_BOARD_SIZE; i++) {
+		for (size_t j = 0; j < 4; j++)
+			printf("─");
+		if (i + 1 != REVERC_BOARD_SIZE)
+			printf("┬");
+	}
+	printf("┐\n");
+	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
+		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
+			if (x > 0)
+				printf(" │ ");
+			else
+				printf("│ ");
+
+			switch (ctx.board[y][x]) {
+			case REVERC_CELL_STATE_EMPTY: {
+				ssize_t move = -1;
+				for (size_t i = 0; i < ctx.move_count; ++i) {
+					Reverc_Move m = ctx.moves[i];
+					if (m.x == x && m.y == y) {
+						move = i;
+						break;
+					}
+				}
+
+				if (move == -1) {
+					printf("  ");
+				} else {
+					printf("%2zu", move + 1);
+				}
+			} break;
+			case REVERC_CELL_STATE_WHITE: {
+				printf("⚪");
+			} break;
+			case REVERC_CELL_STATE_BLACK: {
+				printf("⚫");
+			} break;
+			}
+		}
+		printf(" │\n");
+
+		if (y + 1 != REVERC_BOARD_SIZE) {
+			printf("├");
+			for (size_t i = 0; i < REVERC_BOARD_SIZE; i++) {
+				for (size_t j = 0; j < 4; j++)
+					printf("─");
+				if (i + 1 != REVERC_BOARD_SIZE)
+					printf("┼");
+			}
+			printf("┤\n");
+		}
+	}
+	printf("└");
+	for (size_t i = 0; i < REVERC_BOARD_SIZE; i++) {
+		for (size_t j = 0; j < 4; j++)
+			printf("─");
+		if (i + 1 != REVERC_BOARD_SIZE)
+			printf("┴");
+	}
+	printf("┘\n");
+
+	if (ctx.move_count > 0) {
+		printf("%s's turn (%zu moves)\n",
+		       ctx.is_black ? "Black" : "White", ctx.move_count);
+		return true;
+	}
+
+	printf("GAME OVER!\n%s wins!", ctx.is_black ? "White" : "Black");
+	return false;
+}

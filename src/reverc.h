@@ -32,5 +32,6 @@ typedef struct {
 Reverc_Context reverc_context_new(void);
 Reverc_Context reverc_context_clone(Reverc_Context other);
 void reverc_make_move(Reverc_Context *ctx, size_t move_number);
+bool reverc_context_report(Reverc_Context ctx);
 
 #endif // REVERC_H_
