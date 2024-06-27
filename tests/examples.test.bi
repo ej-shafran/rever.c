@@ -1,6 +1,6 @@
 :i count 2
-:b shell 21
-yes 1 | ../src/reverc
+:b shell 25
+yes 1 | ../src/reverc-cli
 :i returncode 0
 :b stdout 31030
 Type `help` for help
@@ -350,8 +350,8 @@ BLACK WINS!
 
 :b stderr 0
 
-:b shell 72
-printf %s\\n%s\\n $(yes 2 | head -58) $(yes 1 | head -2) | ../src/reverc
+:b shell 76
+printf %s\\n%s\\n $(yes 2 | head -58) $(yes 1 | head -2) | ../src/reverc-cli
 :i returncode 0
 :b stdout 100858
 Type `help` for help

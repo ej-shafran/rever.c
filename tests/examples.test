@@ -1,2 +1,2 @@
-yes 1 | ../src/reverc
-printf %s\\n%s\\n $(yes 2 | head -58) $(yes 1 | head -2) | ../src/reverc
+yes 1 | ../src/reverc-cli
+printf %s\\n%s\\n $(yes 2 | head -58) $(yes 1 | head -2) | ../src/reverc-cli

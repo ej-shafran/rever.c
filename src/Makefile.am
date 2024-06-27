@@ -1,2 +1,2 @@
-bin_PROGRAMS = reverc
-reverc_SOURCES = main.c reverc.c
+bin_PROGRAMS = reverc-cli
+reverc_cli_SOURCES = cli.c reverc.c
