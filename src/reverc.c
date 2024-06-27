@@ -1,6 +1,8 @@
 #include "reverc.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
 
 #define MATRIX_AT(m, y, x, size) m[((y) * (size)) + (x)]
 #define BLACK_AT(board, y, x) \
@@ -29,6 +31,16 @@
 
 static int DIRECTIONS[8][2] = { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 },
 				{ 1, 1 },   { 1, 0 },  { 1, -1 }, { 0, -1 } };
+
+static uint64_t count_bits(uint64_t n)
+{
+	uint64_t c = n - ((n >> 1) & 0x7777777777777777ULL) -
+		     ((n >> 2) & 0x3333333333333333ULL) -
+		     ((n >> 3) & 0x1111111111111111);
+	c = ((c + (c >> 4)) & 0x0f0f0f0f0f0f0f0fULL) * 0x0101010101010101ULL;
+
+	return c >> 56;
+}
 
 static void calculate_move_changes(Reverc_Context ctx, Reverc_Move *m)
 {
@@ -213,6 +225,16 @@ bool reverc_context_report(Reverc_Context ctx)
 		return true;
 	}
 
-	printf("GAME OVER!\n%s wins!", ctx.is_black ? "White" : "Black");
+	printf("GAME OVER!\n");
+
+	size_t white_count = count_bits(ctx.board.white);
+	size_t black_count = count_bits(ctx.board.black);
+	if (black_count > white_count) {
+		printf("BLACK WINS!\n");
+	} else if (white_count > black_count) {
+		printf("WHITE WINS!\n");
+	} else {
+		printf("TIE!\n");
+	}
 	return false;
 }

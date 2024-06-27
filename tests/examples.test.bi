@@ -2,7 +2,7 @@
 :b shell 21
 yes 1 | ../src/reverc
 :i returncode 0
-:b stdout 31029
+:b stdout 31030
 Type `help` for help
 ┌────┬────┬────┬────┬────┬────┬────┬────┐
 │    │    │    │    │    │    │    │    │
@@ -346,13 +346,14 @@ Black's turn (11 moves)
 │    │    │    │    │    │    │    │    │
 └────┴────┴────┴────┴────┴────┴────┴────┘
 GAME OVER!
-Black wins!
+BLACK WINS!
+
 :b stderr 0
 
 :b shell 72
 printf %s\\n%s\\n $(yes 2 | head -58) $(yes 1 | head -2) | ../src/reverc
 :i returncode 0
-:b stdout 100857
+:b stdout 100858
 Type `help` for help
 ┌────┬────┬────┬────┬────┬────┬────┬────┐
 │    │    │    │    │    │    │    │    │
@@ -1452,7 +1453,8 @@ White's turn (1 moves)
 │    │ ⚪ │ ⚪ │ ⚪ │ ⚪ │ ⚪ │ ⚪ │ ⚪ │
 └────┴────┴────┴────┴────┴────┴────┴────┘
 GAME OVER!
-White wins!
+BLACK WINS!
+
 :b stderr 14
 Invalid move.
 
