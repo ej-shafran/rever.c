@@ -46,7 +46,7 @@ int main(void)
 			char *endptr = NULL;
 			size_t move_number = strtoul(command, &endptr, 10);
 			if (*endptr != '\0' || move_number == 0 ||
-			    move_number - 1 > ctx.move_count) {
+			    move_number - 1 >= ctx.move_count) {
 				fprintf(stderr, "Invalid move.\n");
 			} else {
 				reverc_make_move(&ctx, move_number);
