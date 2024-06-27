@@ -12,7 +12,7 @@ typedef enum {
 	REVERC_CELL_STATE_BLACK,
 } Reverc_CellState;
 
-typedef Reverc_CellState Reverc_Board[REVERC_BOARD_SIZE][REVERC_BOARD_SIZE];
+typedef Reverc_CellState Reverc_Board[REVERC_BOARD_SIZE * REVERC_BOARD_SIZE];
 
 typedef struct {
 	size_t x;

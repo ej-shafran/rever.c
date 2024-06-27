@@ -1,7 +1,9 @@
 #include "reverc.h"
 #include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
+
+#define MATRIX_AT(m, y, x, size) m[((y) * (size)) + (x)]
+#define BOARD_AT(board, y, x) MATRIX_AT(board, y, x, REVERC_BOARD_SIZE)
 
 static int DIRECTIONS[8][2] = { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 },
 				{ 1, 1 },   { 1, 0 },  { 1, -1 }, { 0, -1 } };
@@ -22,7 +24,7 @@ static size_t move_is_valid(Reverc_Context ctx, Reverc_Move *m)
 		     x >= 0 && x < REVERC_BOARD_SIZE && y >= 0 &&
 		     y < REVERC_BOARD_SIZE;
 		     x += dx, y += dy) {
-			Reverc_CellState cell = ctx.board[y][x];
+			Reverc_CellState cell = BOARD_AT(ctx.board, y, x);
 
 			if (cell == REVERC_CELL_STATE_EMPTY)
 				break;
@@ -56,7 +58,8 @@ static void calculate_moves(Reverc_Context *ctx)
 
 	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
 		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
-			if (ctx->board[y][x] != REVERC_CELL_STATE_EMPTY)
+			if (BOARD_AT(ctx->board, y, x) !=
+			    REVERC_CELL_STATE_EMPTY)
 				continue;
 
 			Reverc_Move m = {
@@ -78,16 +81,16 @@ Reverc_Context reverc_context_new(void)
 
 	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
 		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
-			ctx.board[y][x] = REVERC_CELL_STATE_EMPTY;
+			BOARD_AT(ctx.board, y, x) = REVERC_CELL_STATE_EMPTY;
 		}
 	}
 
 	size_t first = (REVERC_BOARD_SIZE / 2) - 1;
 	size_t second = first + 1;
-	ctx.board[first][first] = REVERC_CELL_STATE_BLACK;
-	ctx.board[second][first] = REVERC_CELL_STATE_WHITE;
-	ctx.board[first][second] = REVERC_CELL_STATE_WHITE;
-	ctx.board[second][second] = REVERC_CELL_STATE_BLACK;
+	BOARD_AT(ctx.board, first, first) = REVERC_CELL_STATE_BLACK;
+	BOARD_AT(ctx.board, second, first) = REVERC_CELL_STATE_WHITE;
+	BOARD_AT(ctx.board, first, second) = REVERC_CELL_STATE_WHITE;
+	BOARD_AT(ctx.board, second, second) = REVERC_CELL_STATE_BLACK;
 
 	calculate_moves(&ctx);
 
@@ -101,7 +104,7 @@ Reverc_Context reverc_context_clone(Reverc_Context other)
 	ctx.move_count = other.move_count;
 	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
 		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
-			ctx.board[y][x] = other.board[y][x];
+			BOARD_AT(ctx.board, y, x) = BOARD_AT(other.board, y, x);
 		}
 	}
 	for (size_t i = 0; i < other.move_count; ++i) {
@@ -115,9 +118,9 @@ void reverc_make_move(Reverc_Context *ctx, size_t move_number)
 	Reverc_CellState self = ctx->is_black ? REVERC_CELL_STATE_BLACK :
 						REVERC_CELL_STATE_WHITE;
 	Reverc_Move m = ctx->moves[move_number - 1];
-	ctx->board[m.y][m.x] = self;
+	BOARD_AT(ctx->board, m.y, m.x) = self;
 	for (size_t i = 0; i < m.changes_count; ++i) {
-		ctx->board[m.changes[i][0]][m.changes[i][1]] = self;
+		BOARD_AT(ctx->board, m.changes[i][0], m.changes[i][1]) = self;
 	}
 	ctx->is_black = !ctx->is_black;
 	calculate_moves(ctx);
@@ -140,7 +143,7 @@ bool reverc_context_report(Reverc_Context ctx)
 			else
 				printf("│ ");
 
-			switch (ctx.board[y][x]) {
+			switch (BOARD_AT(ctx.board, y, x)) {
 			case REVERC_CELL_STATE_EMPTY: {
 				ssize_t move = -1;
 				for (size_t i = 0; i < ctx.move_count; ++i) {
