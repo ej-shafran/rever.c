@@ -6,6 +6,8 @@
 #include <stdio.h>
 
 #define REVERC_BOARD_SIZE 8
+// https://jxiv.jst.go.jp/index.php/jxiv/preprint/download/480/1498/1315
+#define REVERC_MAX_MOVE_COUNT 33
 
 typedef enum {
 	REVERC_CELL_STATE_EMPTY,
@@ -29,7 +31,7 @@ typedef struct {
 typedef struct {
 	Reverc_Board board;
 	bool is_black;
-	Reverc_Move moves[REVERC_BOARD_SIZE * REVERC_BOARD_SIZE];
+	Reverc_Move moves[REVERC_MAX_MOVE_COUNT];
 	size_t move_count;
 } Reverc_Context;
 
