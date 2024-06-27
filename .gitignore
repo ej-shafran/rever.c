@@ -1,6 +1,7 @@
 # Personal ignore
 
 *.log
+*.trs
 *.a
 *.exe
 *~
