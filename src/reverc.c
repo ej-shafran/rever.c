@@ -8,7 +8,7 @@
 static int DIRECTIONS[8][2] = { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 },
 				{ 1, 1 },   { 1, 0 },  { 1, -1 }, { 0, -1 } };
 
-static size_t move_is_valid(Reverc_Context ctx, Reverc_Move *m)
+static void calculate_move_changes(Reverc_Context ctx, Reverc_Move *m)
 {
 	Reverc_CellState other = ctx.is_black ? REVERC_CELL_STATE_WHITE :
 						REVERC_CELL_STATE_BLACK;
@@ -48,8 +48,6 @@ static size_t move_is_valid(Reverc_Context ctx, Reverc_Move *m)
 			m->changes_count += changes_count;
 		}
 	}
-
-	return m->changes_count;
 }
 
 static void calculate_moves(Reverc_Context *ctx)
@@ -68,7 +66,8 @@ static void calculate_moves(Reverc_Context *ctx)
 				.changes_count = 0,
 				.changes = { 0 },
 			};
-			if (move_is_valid(*ctx, &m)) {
+			calculate_move_changes(*ctx, &m);
+			if (m.changes_count > 0) {
 				ctx->moves[ctx->move_count++] = m;
 			}
 		}
