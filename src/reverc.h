@@ -9,6 +9,15 @@
 // https://jxiv.jst.go.jp/index.php/jxiv/preprint/download/480/1498/1315
 #define REVERC_MAX_MOVE_COUNT 33
 
+#define BLACK_AT(board, y, x) \
+	((board).black & (1ULL << (((y) * REVERC_BOARD_SIZE) + (x))))
+#define WHITE_AT(board, y, x) \
+	((board).white & (1ULL << (((y) * REVERC_BOARD_SIZE) + (x))))
+#define GET_CELL_AT(ctx, y, x)                                   \
+	(BLACK_AT((ctx).board, y, x) ? REVERC_CELL_STATE_BLACK : \
+	 WHITE_AT((ctx).board, y, x) ? REVERC_CELL_STATE_WHITE : \
+				       REVERC_CELL_STATE_EMPTY)
+
 typedef enum {
 	REVERC_CELL_STATE_EMPTY,
 	REVERC_CELL_STATE_WHITE,
@@ -38,6 +47,6 @@ typedef struct {
 Reverc_Context reverc_context_new(void);
 Reverc_Context reverc_context_clone(Reverc_Context other);
 bool reverc_make_move(Reverc_Context *ctx, size_t move_number);
-bool reverc_context_report(Reverc_Context ctx);
+Reverc_CellState reverc_winner(Reverc_Context ctx);
 
 #endif // REVERC_H_
