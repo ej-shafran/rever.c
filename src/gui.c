@@ -57,6 +57,31 @@ void draw_move(Reverc_Context *ctx, size_t move_index)
 	}
 }
 
+void draw_game_over(Reverc_Context ctx)
+{
+	int font_size = 40;
+	int width = MeasureText(GAME_OVER_MESSAGE, font_size);
+	DrawText(GAME_OVER_MESSAGE, (800 / 2) - (width / 2), 800 / 2 - 40,
+		 font_size, BLACK);
+
+	Reverc_CellState winner = reverc_winner(ctx);
+	const char *wins_message;
+	switch (winner) {
+	case REVERC_CELL_STATE_EMPTY: {
+		wins_message = "IT'S A TIE!";
+	} break;
+	case REVERC_CELL_STATE_WHITE: {
+		wins_message = "WHITE WINS!";
+	} break;
+	case REVERC_CELL_STATE_BLACK: {
+		wins_message = "BLACK WINS!";
+	} break;
+	}
+	width = MeasureText(wins_message, font_size);
+	DrawText(wins_message, (800 / 2) - (width / 2), 800 / 2 + 20, font_size,
+		 BLACK);
+}
+
 int main(void)
 {
 	Reverc_Context ctx = reverc_context_new();
@@ -68,29 +93,7 @@ int main(void)
 
 		ClearBackground(DARKGREEN);
 
-		if (ctx.move_count == 0) {
-			int font_size = 40;
-			int width = MeasureText(GAME_OVER_MESSAGE, font_size);
-			DrawText(GAME_OVER_MESSAGE, (800 / 2) - (width / 2),
-				 800 / 2 - 40, font_size, BLACK);
-
-			Reverc_CellState winner = reverc_winner(ctx);
-			const char *wins_message;
-			switch (winner) {
-			case REVERC_CELL_STATE_EMPTY: {
-				wins_message = "IT'S A TIE!";
-			} break;
-			case REVERC_CELL_STATE_WHITE: {
-				wins_message = "WHITE WINS!";
-			} break;
-			case REVERC_CELL_STATE_BLACK: {
-				wins_message = "BLACK WINS!";
-			} break;
-			}
-			width = MeasureText(wins_message, font_size);
-			DrawText(wins_message, (800 / 2) - (width / 2),
-				 800 / 2 + 20, font_size, BLACK);
-		} else {
+		if (ctx.move_count > 0) {
 			for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
 				for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
 					draw_square(ctx, y, x);
@@ -100,6 +103,8 @@ int main(void)
 			for (size_t i = 0; i < ctx.move_count; ++i) {
 				draw_move(&ctx, i);
 			}
+		} else {
+			draw_game_over(ctx);
 		}
 
 		EndDrawing();
