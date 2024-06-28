@@ -141,8 +141,11 @@ Reverc_Context reverc_context_clone(Reverc_Context other)
 	return ctx;
 }
 
-void reverc_make_move(Reverc_Context *ctx, size_t move_number)
+bool reverc_make_move(Reverc_Context *ctx, size_t move_number)
 {
+	if (move_number == 0 || move_number - 1 >= ctx->move_count)
+		return false;
+
 	Reverc_CellState self = ctx->is_black ? REVERC_CELL_STATE_BLACK :
 						REVERC_CELL_STATE_WHITE;
 	Reverc_Move m = ctx->moves[move_number - 1];
@@ -153,6 +156,7 @@ void reverc_make_move(Reverc_Context *ctx, size_t move_number)
 	}
 	ctx->is_black = !ctx->is_black;
 	calculate_moves(ctx);
+	return true;
 }
 
 bool reverc_context_report(Reverc_Context ctx)
