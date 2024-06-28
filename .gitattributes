@@ -1,3 +1,4 @@
 * text eol=lf
 
 tests/*.bi linguist-generated
+rere.py linguist-generated
