@@ -22,6 +22,7 @@ AS_IF([test "x$enable_tests" = "xyes"], [
 ])
 
 # Checks for libraries.
+AC_SEARCH_LIBS([sqrt], [m])
 
 # Checks for header files.
 

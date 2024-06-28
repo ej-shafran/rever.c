@@ -8,6 +8,7 @@
 *.orig
 *.o
 src/reverc-cli
+src/reverc
 reverc-[0-9].[0-9].[0-9].tar.*
 
 # http://www.gnu.org/software/automake
