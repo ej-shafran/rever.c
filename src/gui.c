@@ -3,6 +3,8 @@
 
 #define SQUARE_SIZE 100
 
+#define GAME_OVER_MESSAGE "GAME OVER!"
+
 void draw_square(Reverc_Context ctx, size_t y, size_t x)
 {
 	int pixel_x = x * SQUARE_SIZE;
@@ -67,9 +69,27 @@ int main(void)
 		ClearBackground(DARKGREEN);
 
 		if (ctx.move_count == 0) {
-			int width = MeasureText("GAME OVER!", 40);
-			DrawText("GAME OVER!", (800 / 2) - (width / 2),
-				 800 / 2 - 20, 40, BLACK);
+			int font_size = 40;
+			int width = MeasureText(GAME_OVER_MESSAGE, font_size);
+			DrawText(GAME_OVER_MESSAGE, (800 / 2) - (width / 2),
+				 800 / 2 - 40, font_size, BLACK);
+
+			Reverc_CellState winner = reverc_winner(ctx);
+			const char *wins_message;
+			switch (winner) {
+			case REVERC_CELL_STATE_EMPTY: {
+				wins_message = "IT'S A TIE!";
+			} break;
+			case REVERC_CELL_STATE_WHITE: {
+				wins_message = "WHITE WINS!";
+			} break;
+			case REVERC_CELL_STATE_BLACK: {
+				wins_message = "BLACK WINS!";
+			} break;
+			}
+			width = MeasureText(wins_message, font_size);
+			DrawText(wins_message, (800 / 2) - (width / 2),
+				 800 / 2 + 20, font_size, BLACK);
 		} else {
 			for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
 				for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
