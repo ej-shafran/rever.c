@@ -113,7 +113,7 @@ int main(int argc, const char **argv)
 				} else {
 					pending_computer_move =
 						reverc_get_computer_move_index(
-							&ctx);
+							ctx);
 				}
 			} else {
 				timer += GetFrameTime();

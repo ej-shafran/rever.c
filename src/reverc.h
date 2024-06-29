@@ -63,7 +63,7 @@ typedef struct {
 
 Reverc_Context reverc_context_new(int argc, const char **argv);
 Reverc_Context reverc_context_clone(Reverc_Context other);
-size_t reverc_get_computer_move_index(Reverc_Context *ctx);
+size_t reverc_get_computer_move_index(Reverc_Context ctx);
 bool reverc_is_player_move(Reverc_Context ctx);
 bool reverc_make_move(Reverc_Context *ctx, size_t move_number);
 Reverc_CellState reverc_winner(Reverc_Context ctx);

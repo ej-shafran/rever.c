@@ -153,7 +153,7 @@ int main(int argc, const char **argv)
 				break;
 		} else {
 			reverc_make_move(
-				&ctx, reverc_get_computer_move_index(&ctx) + 1);
+				&ctx, reverc_get_computer_move_index(ctx) + 1);
 		}
 	}
 
