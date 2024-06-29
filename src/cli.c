@@ -95,9 +95,9 @@ bool print_board(Reverc_Context ctx)
 	return false;
 }
 
-int main(void)
+int main(int argc, const char **argv)
 {
-	Reverc_Context ctx = reverc_context_new();
+	Reverc_Context ctx = reverc_context_new(argc, argv);
 
 	printf("Type `help` for help\n");
 

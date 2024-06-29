@@ -3,8 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-
-#define MATRIX_AT(m, y, x, size) m[((y) * (size)) + (x)]
+#include <string.h>
 
 #define SET_BOARD_AT(board, y, x, state)                                      \
 	do {                                                                  \
@@ -99,16 +98,26 @@ static void calculate_moves(Reverc_Context *ctx)
 	}
 }
 
-Reverc_Context reverc_context_new(void)
+Reverc_Context reverc_context_new(int argc, const char **argv)
 {
-	Reverc_Context ctx = { 0 };
+	bool is_two_player = false;
+	argc -= 1;
+	argv += 1;
+	for (int i = 0; i < argc; ++i) {
+		if (strcmp(argv[i], "--two-player") == 0) {
+			is_two_player = true;
+		} else {
+			REVERC_WARNING("unrecognized argument '%s'", argv[i]);
+		}
+	}
 
-	size_t first = (REVERC_BOARD_SIZE / 2) - 1;
-	size_t second = first + 1;
-	SET_BOARD_AT(ctx.board, first, first, REVERC_CELL_STATE_BLACK);
-	SET_BOARD_AT(ctx.board, second, first, REVERC_CELL_STATE_WHITE);
-	SET_BOARD_AT(ctx.board, first, second, REVERC_CELL_STATE_WHITE);
-	SET_BOARD_AT(ctx.board, second, second, REVERC_CELL_STATE_BLACK);
+	Reverc_Context ctx = {
+		.is_black = true,
+		.board = { .black = 0x1008000000, .white = 0x810000000, },
+		.is_two_player = is_two_player,
+		.moves = { 0 },
+		.move_count = 0,
+	};
 
 	calculate_moves(&ctx);
 
@@ -120,11 +129,8 @@ Reverc_Context reverc_context_clone(Reverc_Context other)
 	Reverc_Context ctx = { 0 };
 	ctx.is_black = other.is_black;
 	ctx.move_count = other.move_count;
-	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
-		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
-			SET_BOARD_AT(ctx.board, y, x, GET_CELL_AT(other, y, x));
-		}
-	}
+	ctx.board.white = other.board.white;
+	ctx.board.black = other.board.black;
 	for (size_t i = 0; i < other.move_count; ++i) {
 		ctx.moves[i] = other.moves[i];
 	}

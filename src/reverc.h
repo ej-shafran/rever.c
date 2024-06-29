@@ -18,6 +18,19 @@
 	 WHITE_AT((ctx).board, y, x) ? REVERC_CELL_STATE_WHITE : \
 				       REVERC_CELL_STATE_EMPTY)
 
+#ifdef INCLUDE_RAYLIB
+#include "raylib.h"
+#endif
+
+#ifndef REVERC_WARNING
+#define REVERC_WARNING(...)                    \
+	do {                                   \
+		fprintf(stderr, "[WARNING] "); \
+		fprintf(stderr, __VA_ARGS__);  \
+		fprintf(stderr, "\n");         \
+	} while (0)
+#endif // REVERC_WARNING
+
 typedef enum {
 	REVERC_CELL_STATE_EMPTY,
 	REVERC_CELL_STATE_WHITE,
@@ -38,13 +51,16 @@ typedef struct {
 } Reverc_Move;
 
 typedef struct {
-	Reverc_Board board;
 	bool is_black;
-	Reverc_Move moves[REVERC_MAX_MOVE_COUNT];
+	bool is_two_player;
+
+	Reverc_Board board;
+
 	size_t move_count;
+	Reverc_Move moves[REVERC_MAX_MOVE_COUNT];
 } Reverc_Context;
 
-Reverc_Context reverc_context_new(void);
+Reverc_Context reverc_context_new(int argc, const char **argv);
 Reverc_Context reverc_context_clone(Reverc_Context other);
 bool reverc_make_move(Reverc_Context *ctx, size_t move_number);
 Reverc_CellState reverc_winner(Reverc_Context ctx);

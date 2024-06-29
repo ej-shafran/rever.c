@@ -82,9 +82,9 @@ void draw_game_over(Reverc_Context ctx)
 		 BLACK);
 }
 
-int main(void)
+int main(int argc, const char **argv)
 {
-	Reverc_Context ctx = reverc_context_new();
+	Reverc_Context ctx = reverc_context_new(argc, argv);
 
 	InitWindow(800, 800, "rever.c");
 
