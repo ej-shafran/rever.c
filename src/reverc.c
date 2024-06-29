@@ -195,7 +195,8 @@ typedef struct {
 ComputerMoveResult get_computer_move_impl(Reverc_Context ctx, bool is_black,
 					  size_t depth);
 
-int calculate_position_score(Reverc_Context ctx, bool is_black, size_t depth)
+uint64_t calculate_position_score(Reverc_Context ctx, bool is_black,
+				  size_t depth)
 {
 	if (depth >= MAX_DEPTH) {
 		uint64_t black_bits = count_bits(ctx.board.black);
@@ -210,12 +211,12 @@ int calculate_position_score(Reverc_Context ctx, bool is_black, size_t depth)
 ComputerMoveResult get_computer_move_impl(Reverc_Context ctx, bool is_black,
 					  size_t depth)
 {
-	int best_score = INT_MIN;
+	uint64_t best_score = 0;
 	size_t best_index = 0;
 	for (size_t i = 0; i < ctx.move_count; ++i) {
 		Reverc_Context clone = reverc_context_clone(ctx);
 		reverc_make_move(&clone, i + 1);
-		int worth =
+		uint64_t worth =
 			calculate_position_score(clone, is_black, depth + 1);
 		if (worth > best_score) {
 			best_score = worth;
