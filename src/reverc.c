@@ -3,7 +3,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define SET_BOARD_AT(board, y, x, state)                                      \
 	do {                                                                  \
@@ -100,6 +102,8 @@ static void calculate_moves(Reverc_Context *ctx)
 
 Reverc_Context reverc_context_new(int argc, const char **argv)
 {
+	srand(time(NULL));
+
 	bool is_two_player = false;
 	bool player_is_black = true;
 	argc -= 1;
@@ -181,4 +185,10 @@ Reverc_CellState reverc_winner(Reverc_Context ctx)
 	} else {
 		return REVERC_CELL_STATE_EMPTY;
 	}
+}
+
+void reverc_computer_make_move(Reverc_Context *ctx)
+{
+	int move_index = rand() % ctx->move_count;
+	reverc_make_move(ctx, move_index + 1);
 }

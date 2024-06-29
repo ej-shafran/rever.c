@@ -105,8 +105,7 @@ int main(int argc, const char **argv)
 					draw_move(&ctx, i);
 				}
 			} else {
-				TraceLog(LOG_ERROR, "TODO");
-				break;
+				reverc_computer_make_move(&ctx);
 			}
 		} else {
 			draw_game_over(ctx);

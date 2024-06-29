@@ -152,8 +152,7 @@ int main(int argc, const char **argv)
 			if (player_move(&ctx))
 				break;
 		} else {
-			fprintf(stderr, "TODO\n");
-			return 1;
+			reverc_computer_make_move(&ctx);
 		}
 	}
 
