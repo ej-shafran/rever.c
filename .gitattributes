@@ -1,5 +1,4 @@
 * text eol=lf
 
-raylib/**/* linguist-generated
 tests/*.bi linguist-generated
 rere.py linguist-generated
