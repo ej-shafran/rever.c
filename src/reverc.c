@@ -3,9 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <limits.h>
+
+#define MAX_DEPTH 4
 
 #define SET_BOARD_AT(board, y, x, state)                                      \
 	do {                                                                  \
@@ -103,8 +104,6 @@ static void calculate_moves(Reverc_Context *ctx)
 
 Reverc_Context reverc_context_new(int argc, const char **argv)
 {
-	srand(time(NULL));
-
 	bool is_two_player = false;
 	bool player_is_black = true;
 	argc -= 1;
@@ -188,7 +187,47 @@ Reverc_CellState reverc_winner(Reverc_Context ctx)
 	}
 }
 
+typedef struct {
+	uint64_t best_score;
+	size_t best_index;
+} ComputerMoveResult;
+
+ComputerMoveResult get_computer_move_impl(Reverc_Context *ctx, bool is_black,
+					  size_t depth);
+
+int calculate_position_score(Reverc_Context *ctx, bool is_black, size_t depth)
+{
+	if (depth >= MAX_DEPTH) {
+		uint64_t black_bits = count_bits(ctx->board.black);
+		uint64_t white_bits = count_bits(ctx->board.white);
+		return is_black ? black_bits - white_bits :
+				  white_bits - black_bits;
+	}
+
+	return get_computer_move_impl(ctx, is_black, depth).best_score;
+}
+
+ComputerMoveResult get_computer_move_impl(Reverc_Context *ctx, bool is_black,
+					  size_t depth)
+{
+	int best_score = INT_MIN;
+	size_t best_index = 0;
+	for (size_t i = 0; i < ctx->move_count; ++i) {
+		Reverc_Context clone = reverc_context_clone(*ctx);
+		reverc_make_move(&clone, i + 1);
+		int worth =
+			calculate_position_score(&clone, is_black, depth + 1);
+		if (worth > best_score) {
+			best_score = worth;
+			best_index = i;
+		}
+	}
+
+	return (ComputerMoveResult){ .best_index = best_index,
+				     .best_score = best_score };
+}
+
 size_t reverc_get_computer_move_index(Reverc_Context *ctx)
 {
-	return rand() % ctx->move_count;
+	return get_computer_move_impl(ctx, ctx->is_black, 0).best_index;
 }
