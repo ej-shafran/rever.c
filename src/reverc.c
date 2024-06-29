@@ -73,6 +73,7 @@ static void calculate_move_changes(Reverc_Context ctx, Reverc_Move *m)
 					changes[i][1];
 			}
 			m->changes_count += changes_count;
+			break;
 		}
 	}
 }
@@ -126,7 +127,7 @@ Reverc_Context reverc_context_new(int argc, const char **argv)
 
 	Reverc_Context ctx = {
 		.is_black = true,
-		.board = { .black = 0x1008000000, .white = 0x810000000, },
+		.board = { .black = 0x810000000, .white = 0x1008000000 },
 		.is_two_player = is_two_player,
 		.player_is_black = player_is_black,
 		.moves = { 0 },
