@@ -101,11 +101,20 @@ static void calculate_moves(Reverc_Context *ctx)
 Reverc_Context reverc_context_new(int argc, const char **argv)
 {
 	bool is_two_player = false;
+	bool player_is_black = true;
 	argc -= 1;
 	argv += 1;
 	for (int i = 0; i < argc; ++i) {
 		if (strcmp(argv[i], "--two-player") == 0) {
 			is_two_player = true;
+		} else if (strcmp(argv[i], "--play-as-white") == 0) {
+			if (is_two_player) {
+				REVERC_WARNING(
+					"--play-as-white has no meaning when passing --two-player");
+				continue;
+			}
+
+			player_is_black = false;
 		} else {
 			REVERC_WARNING("unrecognized argument '%s'", argv[i]);
 		}
@@ -115,6 +124,7 @@ Reverc_Context reverc_context_new(int argc, const char **argv)
 		.is_black = true,
 		.board = { .black = 0x1008000000, .white = 0x810000000, },
 		.is_two_player = is_two_player,
+		.player_is_black = player_is_black,
 		.moves = { 0 },
 		.move_count = 0,
 	};
@@ -135,6 +145,11 @@ Reverc_Context reverc_context_clone(Reverc_Context other)
 		ctx.moves[i] = other.moves[i];
 	}
 	return ctx;
+}
+
+bool reverc_is_player_move(Reverc_Context ctx)
+{
+	return ctx.is_two_player || ctx.is_black == ctx.player_is_black;
 }
 
 bool reverc_make_move(Reverc_Context *ctx, size_t move_number)

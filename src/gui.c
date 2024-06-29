@@ -100,8 +100,13 @@ int main(int argc, const char **argv)
 				}
 			}
 
-			for (size_t i = 0; i < ctx.move_count; ++i) {
-				draw_move(&ctx, i);
+			if (reverc_is_player_move(ctx)) {
+				for (size_t i = 0; i < ctx.move_count; ++i) {
+					draw_move(&ctx, i);
+				}
+			} else {
+				TraceLog(LOG_ERROR, "TODO");
+				break;
 			}
 		} else {
 			draw_game_over(ctx);

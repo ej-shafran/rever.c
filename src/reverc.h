@@ -53,6 +53,7 @@ typedef struct {
 typedef struct {
 	bool is_black;
 	bool is_two_player;
+	bool player_is_black;
 
 	Reverc_Board board;
 
@@ -62,6 +63,7 @@ typedef struct {
 
 Reverc_Context reverc_context_new(int argc, const char **argv);
 Reverc_Context reverc_context_clone(Reverc_Context other);
+bool reverc_is_player_move(Reverc_Context ctx);
 bool reverc_make_move(Reverc_Context *ctx, size_t move_number);
 Reverc_CellState reverc_winner(Reverc_Context ctx);
 

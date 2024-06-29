@@ -5,11 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int exitcode = 0;
+
 #define MAIN_LOOP_QUIT(code)     \
 	do {                     \
 		quit = true;     \
 		exitcode = code; \
-		goto _break;     \
+		goto _end;       \
 	} while (0)
 
 bool print_board(Reverc_Context ctx)
@@ -95,51 +97,64 @@ bool print_board(Reverc_Context ctx)
 	return false;
 }
 
+bool player_move(Reverc_Context *ctx)
+{
+	bool quit = false;
+
+	char *command = NULL;
+	size_t n = 0;
+
+	ssize_t nread = getline(&command, &n, stdin);
+	if (nread < 0 || command[nread - 1] != '\n') {
+		fprintf(stderr, "\nFailed to read from stdin\n");
+		quit = true;
+		exitcode = 1;
+		goto _end;
+	}
+	command[nread - 1] = '\0';
+
+	if (strcmp(command, "quit") == 0) {
+		quit = true;
+	} else if (strcmp(command, "help") == 0) {
+		printf("possible commands: \n");
+		printf("  help - print this help information\n");
+		printf("  [number] - play the nth suggested move\n");
+		printf("  quit - exit the game immediately\n");
+	} else if (isdigit(command[0])) {
+		char *endptr = NULL;
+		size_t move_number = strtoul(command, &endptr, 10);
+
+		if (*endptr != '\0' || !reverc_make_move(ctx, move_number))
+			fprintf(stderr, "Invalid move.\n");
+	} else {
+		fprintf(stderr, "Invalid command '%s'\n", command);
+	}
+
+_end:
+	if (command)
+		free(command);
+
+	return quit;
+}
+
 int main(int argc, const char **argv)
 {
 	Reverc_Context ctx = reverc_context_new(argc, argv);
 
 	printf("Type `help` for help\n");
 
-	int exitcode = 0;
 	bool quit = false;
 	while (!quit) {
 		if (!print_board(ctx))
 			break;
 
-		char *command = NULL;
-		size_t n = 0;
-
-		ssize_t nread = getline(&command, &n, stdin);
-		if (nread < 0 || command[nread - 1] != '\n') {
-			fprintf(stderr, "\nFailed to read from stdin\n");
-			MAIN_LOOP_QUIT(1);
-		}
-		command[nread - 1] = '\0';
-
-		if (strcmp(command, "quit") == 0) {
-			quit = true;
-			MAIN_LOOP_QUIT(0);
-		} else if (strcmp(command, "help") == 0) {
-			printf("possible commands: \n");
-			printf("  help - print this help information\n");
-			printf("  [number] - play the nth suggested move\n");
-			printf("  quit - exit the game immediately\n");
-		} else if (isdigit(command[0])) {
-			char *endptr = NULL;
-			size_t move_number = strtoul(command, &endptr, 10);
-
-			if (*endptr != '\0' ||
-			    !reverc_make_move(&ctx, move_number))
-				fprintf(stderr, "Invalid move.\n");
+		if (reverc_is_player_move(ctx)) {
+			if (player_move(&ctx))
+				break;
 		} else {
-			fprintf(stderr, "Invalid command '%s'\n", command);
-			MAIN_LOOP_QUIT(1);
+			fprintf(stderr, "TODO\n");
+			return 1;
 		}
-
-_break:
-		if (command)
-			free(command);
 	}
 
 	return exitcode;
