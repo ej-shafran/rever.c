@@ -187,8 +187,7 @@ Reverc_CellState reverc_winner(Reverc_Context ctx)
 	}
 }
 
-void reverc_computer_make_move(Reverc_Context *ctx)
+size_t reverc_get_computer_move_index(Reverc_Context *ctx)
 {
-	int move_index = rand() % ctx->move_count;
-	reverc_make_move(ctx, move_index + 1);
+	return rand() % ctx->move_count;
 }

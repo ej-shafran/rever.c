@@ -1,7 +1,9 @@
 #include "raylib.h"
 #include "reverc.h"
+#include <stdbool.h>
 
 #define SQUARE_SIZE 100
+#define COMPUTER_MOVE_BUFFER 0.45
 
 #define GAME_OVER_MESSAGE "GAME OVER!"
 
@@ -88,6 +90,8 @@ int main(int argc, const char **argv)
 
 	InitWindow(800, 800, "rever.c");
 
+	ssize_t pending_computer_move = -1;
+	float timer = 0;
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 
@@ -100,12 +104,26 @@ int main(int argc, const char **argv)
 				}
 			}
 
-			if (reverc_is_player_move(ctx)) {
-				for (size_t i = 0; i < ctx.move_count; ++i) {
-					draw_move(&ctx, i);
+			if (pending_computer_move == -1) {
+				if (reverc_is_player_move(ctx)) {
+					for (size_t i = 0; i < ctx.move_count;
+					     ++i) {
+						draw_move(&ctx, i);
+					}
+				} else {
+					pending_computer_move =
+						reverc_get_computer_move_index(
+							&ctx);
 				}
 			} else {
-				reverc_computer_make_move(&ctx);
+				timer += GetFrameTime();
+				if (timer > COMPUTER_MOVE_BUFFER) {
+					reverc_make_move(&ctx,
+							 pending_computer_move +
+								 1);
+					pending_computer_move = -1;
+					timer = 0;
+				}
 			}
 		} else {
 			draw_game_over(ctx);

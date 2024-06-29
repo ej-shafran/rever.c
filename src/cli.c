@@ -152,7 +152,8 @@ int main(int argc, const char **argv)
 			if (player_move(&ctx))
 				break;
 		} else {
-			reverc_computer_make_move(&ctx);
+			reverc_make_move(
+				&ctx, reverc_get_computer_move_index(&ctx) + 1);
 		}
 	}
 
