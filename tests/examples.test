@@ -1,2 +1,2 @@
-yes 1 | ../src/reverc-cli --two-player
-printf %s\\n%s\\n $(yes 2 | head -58) $(yes 1 | head -2) | ../src/reverc-cli --two-player
+yes 1 | ../reverc-cli/reverc-cli --two-player
+printf %s\\n%s\\n $(yes 2 | head -36) $(yes 1 | head -10) | ../reverc-cli/reverc-cli --two-player
