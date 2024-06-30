@@ -32,9 +32,19 @@ endif()
 
 # --- Reverc ---
 
+add_custom_target("uninstall" COMMENT "Uninstall installed files")
+add_custom_command(
+    TARGET "uninstall"
+    POST_BUILD
+    COMMENT "Uninstall files with install_manifest.txt"
+    COMMAND xargs rm -vf < install_manifest.txt || echo Nothing in
+            install_manifest.txt to be uninstalled!
+)
+
 # CLI
 
 add_executable(${PROJECT_NAME}-cli)
+install(TARGETS ${PROJECT_NAME}-cli)
 
 set_target_properties(${PROJECT_NAME}-cli PROPERTIES 
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-cli)
@@ -42,6 +52,7 @@ set_target_properties(${PROJECT_NAME}-cli PROPERTIES
 # GUI
 
 add_executable(${PROJECT_NAME})
+install(TARGETS ${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
