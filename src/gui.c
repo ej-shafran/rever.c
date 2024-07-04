@@ -8,19 +8,33 @@
 
 #define GAME_OVER_MESSAGE "GAME OVER!"
 
+int get_screen_size(void)
+{
+	int width = GetScreenWidth();
+	int height = GetScreenHeight();
+
+	return width > height ? height : width;
+}
+
+int get_square_size(void)
+{
+	return get_screen_size() / REVERC_BOARD_SIZE;
+}
+
 void draw_square(Reverc_Context ctx, size_t y, size_t x)
 {
-	int pixel_x = x * SQUARE_SIZE;
-	int pixel_y = y * SQUARE_SIZE;
+	int square_size = get_square_size();
+	int pixel_x = x * square_size;
+	int pixel_y = y * square_size;
 
 	Rectangle rec = { .x = pixel_x,
 			  .y = pixel_y,
-			  .width = SQUARE_SIZE,
-			  .height = SQUARE_SIZE };
+			  .width = square_size,
+			  .height = square_size };
 
-	float stone_radius = ((float)SQUARE_SIZE / 2) - 5;
-	int center_x = pixel_x + (SQUARE_SIZE / 2);
-	int center_y = pixel_y + (SQUARE_SIZE / 2);
+	float stone_radius = ((float)square_size / 2) - 5;
+	int center_x = pixel_x + (square_size / 2);
+	int center_y = pixel_y + (square_size / 2);
 
 	DrawRectangleLinesEx(rec, 3, BLACK);
 
@@ -48,21 +62,22 @@ void draw_board(Reverc_Context ctx)
 
 bool draw_move(Reverc_Context *ctx, size_t move_index)
 {
+	int square_size = get_square_size();
 	int x = ctx->moves[move_index].x;
 	int y = ctx->moves[move_index].y;
-	int pixel_x = x * SQUARE_SIZE;
-	int pixel_y = y * SQUARE_SIZE;
+	int pixel_x = x * square_size;
+	int pixel_y = y * square_size;
 
-	float stone_radius = ((float)SQUARE_SIZE / 2) - 5;
-	int center_x = pixel_x + (SQUARE_SIZE / 2);
-	int center_y = pixel_y + (SQUARE_SIZE / 2);
+	float stone_radius = ((float)square_size / 2) - 5;
+	int center_x = pixel_x + (square_size / 2);
+	int center_y = pixel_y + (square_size / 2);
 	DrawCircle(center_x, center_y, stone_radius, YELLOW);
 
 	Vector2 mouse = GetMousePosition();
 	bool in_bounds_x = mouse.x >= pixel_x &&
-			   mouse.x < pixel_x + SQUARE_SIZE;
+			   mouse.x < pixel_x + square_size;
 	bool in_bounds_y = mouse.y >= pixel_y &&
-			   mouse.y < pixel_y + SQUARE_SIZE;
+			   mouse.y < pixel_y + square_size;
 	if (in_bounds_x && in_bounds_y &&
 	    IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		reverc_make_move(ctx, move_index + 1);
@@ -74,10 +89,11 @@ bool draw_move(Reverc_Context *ctx, size_t move_index)
 
 void draw_game_over(Reverc_Context ctx)
 {
+	int screen_size = get_screen_size();
 	int font_size = 40;
 	int width = MeasureText(GAME_OVER_MESSAGE, font_size);
-	DrawText(GAME_OVER_MESSAGE, (800 / 2) - (width / 2), 800 / 2 - 40,
-		 font_size, BLACK);
+	DrawText(GAME_OVER_MESSAGE, (screen_size / 2) - (width / 2),
+		 screen_size / 2 - 40, font_size, BLACK);
 
 	Reverc_CellState winner = reverc_winner(ctx);
 	const char *wins_message;
@@ -93,8 +109,8 @@ void draw_game_over(Reverc_Context ctx)
 	} break;
 	}
 	width = MeasureText(wins_message, font_size);
-	DrawText(wins_message, (800 / 2) - (width / 2), 800 / 2 + 20, font_size,
-		 BLACK);
+	DrawText(wins_message, (screen_size / 2) - (width / 2),
+		 screen_size / 2 + 20, font_size, BLACK);
 }
 
 int main(int argc, const char **argv)
