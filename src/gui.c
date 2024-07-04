@@ -36,7 +36,7 @@ void draw_square(Reverc_Context ctx, size_t y, size_t x)
 	}
 }
 
-void draw_move(Reverc_Context *ctx, size_t move_index)
+bool draw_move(Reverc_Context *ctx, size_t move_index)
 {
 	int x = ctx->moves[move_index].x;
 	int y = ctx->moves[move_index].y;
@@ -56,7 +56,10 @@ void draw_move(Reverc_Context *ctx, size_t move_index)
 	if (in_bounds_x && in_bounds_y &&
 	    IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		reverc_make_move(ctx, move_index + 1);
+		return true;
 	}
+
+	return false;
 }
 
 void draw_game_over(Reverc_Context ctx)
@@ -104,16 +107,15 @@ int main(int argc, const char **argv)
 				}
 			}
 
-			if (pending_computer_move == -1) {
-				if (reverc_is_player_move(ctx)) {
-					for (size_t i = 0; i < ctx.move_count;
-					     ++i) {
-						draw_move(&ctx, i);
+			if (pending_computer_move == -1 &&
+			    reverc_is_player_move(ctx)) {
+				for (size_t i = 0; i < ctx.move_count; ++i) {
+					if (draw_move(&ctx, i)) {
+						pending_computer_move =
+							reverc_get_computer_move_index(
+								ctx);
+						break;
 					}
-				} else {
-					pending_computer_move =
-						reverc_get_computer_move_index(
-							ctx);
 				}
 			} else {
 				timer += GetFrameTime();
