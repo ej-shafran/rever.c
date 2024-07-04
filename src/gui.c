@@ -4,6 +4,7 @@
 
 #define SQUARE_SIZE 100
 #define COMPUTER_MOVE_DELAY 0.45
+#define GAME_OVER_DELAY 1.25
 
 #define GAME_OVER_MESSAGE "GAME OVER!"
 
@@ -33,6 +34,15 @@ void draw_square(Reverc_Context ctx, size_t y, size_t x)
 	case REVERC_CELL_STATE_BLACK: {
 		DrawCircle(center_x, center_y, stone_radius, BLACK);
 	} break;
+	}
+}
+
+void draw_board(Reverc_Context ctx)
+{
+	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
+		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
+			draw_square(ctx, y, x);
+		}
 	}
 }
 
@@ -93,6 +103,7 @@ int main(int argc, const char **argv)
 
 	InitWindow(800, 800, "rever.c");
 
+	bool game_over = false;
 	ssize_t pending_computer_move = -1;
 	float timer = 0;
 	while (!WindowShouldClose()) {
@@ -100,37 +111,41 @@ int main(int argc, const char **argv)
 
 		ClearBackground(DARKGREEN);
 
-		if (ctx.move_count > 0) {
-			for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
-				for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
-					draw_square(ctx, y, x);
-				}
-			}
-
-			if (pending_computer_move == -1 &&
-			    reverc_is_player_move(ctx)) {
-				for (size_t i = 0; i < ctx.move_count; ++i) {
-					if (draw_move(&ctx, i)) {
-						pending_computer_move =
-							reverc_get_computer_move_index(
-								ctx);
-						break;
-					}
-				}
-			} else {
-				timer += GetFrameTime();
-				if (timer > COMPUTER_MOVE_DELAY) {
-					reverc_make_move(&ctx,
-							 pending_computer_move +
-								 1);
-					pending_computer_move = -1;
-					timer = 0;
-				}
-			}
-		} else {
+		if (game_over) {
 			draw_game_over(ctx);
+			goto _next;
 		}
 
+		if (ctx.move_count == 0) {
+			timer += GetFrameTime();
+			if (timer > GAME_OVER_DELAY) {
+				game_over = true;
+			}
+			draw_board(ctx);
+		}
+
+		draw_board(ctx);
+
+		if (pending_computer_move != -1) {
+			timer += GetFrameTime();
+			if (timer > COMPUTER_MOVE_DELAY) {
+				reverc_make_move(&ctx,
+						 pending_computer_move + 1);
+				pending_computer_move = -1;
+				timer = 0;
+			}
+			goto _next;
+		}
+
+		for (size_t i = 0; i < ctx.move_count; ++i) {
+			if (draw_move(&ctx, i)) {
+				pending_computer_move =
+					reverc_get_computer_move_index(ctx);
+				break;
+			}
+		}
+
+_next:
 		EndDrawing();
 	}
 
