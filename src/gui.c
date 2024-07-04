@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #define SQUARE_SIZE 100
-#define COMPUTER_MOVE_BUFFER 0.45
+#define COMPUTER_MOVE_DELAY 0.45
 
 #define GAME_OVER_MESSAGE "GAME OVER!"
 
@@ -119,7 +119,7 @@ int main(int argc, const char **argv)
 				}
 			} else {
 				timer += GetFrameTime();
-				if (timer > COMPUTER_MOVE_BUFFER) {
+				if (timer > COMPUTER_MOVE_DELAY) {
 					reverc_make_move(&ctx,
 							 pending_computer_move +
 								 1);
