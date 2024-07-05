@@ -24,8 +24,10 @@ int get_square_size(void)
 void draw_square(Reverc_Context ctx, size_t y, size_t x)
 {
 	int square_size = get_square_size();
-	int pixel_x = x * square_size;
-	int pixel_y = y * square_size;
+	int padding_x = (GetScreenWidth() - get_screen_size()) / 2;
+	int padding_y = (GetScreenHeight() - get_screen_size()) / 2;
+	int pixel_x = (x * square_size) + padding_x;
+	int pixel_y = (y * square_size) + padding_y;
 
 	Rectangle rec = { .x = pixel_x,
 			  .y = pixel_y,
@@ -65,8 +67,10 @@ bool draw_move(Reverc_Context *ctx, size_t move_index)
 	int square_size = get_square_size();
 	int x = ctx->moves[move_index].x;
 	int y = ctx->moves[move_index].y;
-	int pixel_x = x * square_size;
-	int pixel_y = y * square_size;
+	int padding_x = (GetScreenWidth() - get_screen_size()) / 2;
+	int padding_y = (GetScreenHeight() - get_screen_size()) / 2;
+	int pixel_x = (x * square_size) + padding_x;
+	int pixel_y = (y * square_size) + padding_y;
 
 	float stone_radius = ((float)square_size / 2) - 5;
 	int center_x = pixel_x + (square_size / 2);
@@ -89,11 +93,12 @@ bool draw_move(Reverc_Context *ctx, size_t move_index)
 
 void draw_game_over(Reverc_Context ctx)
 {
-	int screen_size = get_screen_size();
+	int screen_width = GetScreenWidth();
+	int screen_height = GetScreenHeight();
 	int font_size = 40;
 	int width = MeasureText(GAME_OVER_MESSAGE, font_size);
-	DrawText(GAME_OVER_MESSAGE, (screen_size / 2) - (width / 2),
-		 screen_size / 2 - 40, font_size, BLACK);
+	DrawText(GAME_OVER_MESSAGE, (screen_width / 2) - (width / 2),
+		 screen_height / 2 - 40, font_size, BLACK);
 
 	Reverc_CellState winner = reverc_winner(ctx);
 	const char *wins_message;
@@ -109,8 +114,8 @@ void draw_game_over(Reverc_Context ctx)
 	} break;
 	}
 	width = MeasureText(wins_message, font_size);
-	DrawText(wins_message, (screen_size / 2) - (width / 2),
-		 screen_size / 2 + 20, font_size, BLACK);
+	DrawText(wins_message, (screen_width / 2) - (width / 2),
+		 screen_height / 2 + 20, font_size, BLACK);
 }
 
 int main(int argc, const char **argv)
