@@ -22,15 +22,6 @@
 #include "raylib.h"
 #endif
 
-#ifndef REVERC_WARNING
-#define REVERC_WARNING(...)                    \
-	do {                                   \
-		fprintf(stderr, "[WARNING] "); \
-		fprintf(stderr, __VA_ARGS__);  \
-		fprintf(stderr, "\n");         \
-	} while (0)
-#endif // REVERC_WARNING
-
 typedef enum {
 	CELL_EMPTY,
 	CELL_WHITE,
@@ -61,7 +52,19 @@ typedef struct {
 	Move moves[MAX_MOVE_COUNT];
 } RevercContext;
 
+typedef enum {
+  NO_ERROR,
+  UNKNOWN_OPTION,
+  TWO_PLAYER_PLAY_AS,
+} ParseErrorKind;
+
+typedef struct {
+  ParseErrorKind kind;
+  const char *data;
+} ParseError;
+
 RevercContext NewContext(int argc, const char **argv);
+ParseError GetParseError(void);
 RevercContext CloneContext(RevercContext other);
 size_t GetComputerMoveIndex(RevercContext ctx);
 bool IsPlayerMove(RevercContext ctx);

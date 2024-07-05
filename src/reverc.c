@@ -42,6 +42,10 @@ static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
 
 static int DIRECTIONS[8][2] = { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 },
 				{ 1, 1 },   { 1, 0 },  { 1, -1 }, { 0, -1 } };
+static ParseError err = {
+	.kind = NO_ERROR,
+	.data = NULL,
+};
 
 // Internal functions
 
@@ -163,14 +167,15 @@ RevercContext NewContext(int argc, const char **argv)
 			isTwoPlayer = true;
 		} else if (strcmp(argv[i], "--play-as-white") == 0) {
 			if (isTwoPlayer) {
-				REVERC_WARNING(
-					"--play-as-white has no meaning when passing --two-player");
-				continue;
+				err.kind = TWO_PLAYER_PLAY_AS;
+				break;
 			}
 
 			playerIsBlack = false;
 		} else {
-			REVERC_WARNING("unrecognized argument '%s'", argv[i]);
+			err.kind = UNKNOWN_OPTION;
+			err.data = argv[i];
+			break;
 		}
 	}
 
@@ -186,6 +191,11 @@ RevercContext NewContext(int argc, const char **argv)
 	CalculateMoves(&ctx);
 
 	return ctx;
+}
+
+ParseError GetParseError(void)
+{
+	return err;
 }
 
 RevercContext CloneContext(RevercContext other)

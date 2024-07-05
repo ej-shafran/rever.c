@@ -116,6 +116,21 @@ int main(int argc, const char **argv)
 {
 	RevercContext ctx = NewContext(argc, argv);
 
+	ParseError err = GetParseError();
+	switch (err.kind) {
+	case NO_ERROR: {
+	} break;
+	case UNKNOWN_OPTION: {
+		TraceLog(LOG_ERROR, "unknown option '%s'", err.data);
+		return 1;
+	} break;
+	case TWO_PLAYER_PLAY_AS: {
+		TraceLog(LOG_ERROR,
+			 "cannot specify who to play as for two-player");
+		return 1;
+	} break;
+	}
+
 	InitWindow(DEFAULT_SCREEN_SIZE, DEFAULT_SCREEN_SIZE, SCREEN_TITLE);
 
 	bool gameOver = false;

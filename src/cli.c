@@ -140,6 +140,19 @@ _end:
 int main(int argc, const char **argv)
 {
 	RevercContext ctx = NewContext(argc, argv);
+	ParseError err = GetParseError();
+	switch (err.kind) {
+	case NO_ERROR: {
+	} break;
+	case UNKNOWN_OPTION: {
+		fprintf(stderr, "unknown option '%s'", err.data);
+		return 1;
+	} break;
+	case TWO_PLAYER_PLAY_AS: {
+		fprintf(stderr, "cannot specify who to play as for two-player");
+		return 1;
+	} break;
+	}
 
 	printf("Type `help` for help\n");
 
@@ -152,8 +165,7 @@ int main(int argc, const char **argv)
 			if (PlayerMove(&ctx))
 				break;
 		} else {
-			MakeMove(
-				&ctx, GetComputerMoveIndex(ctx) + 1);
+			MakeMove(&ctx, GetComputerMoveIndex(ctx) + 1);
 		}
 	}
 
