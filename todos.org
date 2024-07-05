@@ -6,5 +6,6 @@
 * DONE Pass move index as opposed to move number
   CLOSED: [2024-07-06 Sat 00:30]
 
-* TODO Fix two-player for gui
+* DONE Fix two-player for gui
+  CLOSED: [2024-07-06 Sat 00:34]
 

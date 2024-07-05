@@ -156,7 +156,7 @@ int main(int argc, const char **argv)
 
 		DrawBoard(ctx);
 
-		if (pendingComputerMove != -1) {
+		if (!IsPlayerMove(ctx) && pendingComputerMove != -1) {
 			timer += GetFrameTime();
 			if (timer > COMPUTER_MOVE_DELAY) {
 				MakeMove(&ctx, pendingComputerMove);
@@ -167,7 +167,7 @@ int main(int argc, const char **argv)
 		}
 
 		for (size_t i = 0; i < ctx.movesCount; ++i) {
-			if (DrawMove(&ctx, i)) {
+			if (DrawMove(&ctx, i) && !ctx.isTwoPlayer) {
 				pendingComputerMove = GetComputerMoveIndex(ctx);
 				break;
 			}
