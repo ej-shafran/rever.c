@@ -1,29 +1,8 @@
-#include "raylib.h"
 #include "reverc.h"
+
+#include <raylib.h>
 #include <stdbool.h>
-
-// Computer moves
-#define COMPUTER_MOVE_DELAY 0.45
-
-// Screen/window
-#define DEFAULT_SCREEN_SIZE 800
-#define SCREEN_TITLE "rever.c"
-
-// Colors
-#define BACKGROUND_COLOR DARKGREEN
-#define LINE_COLOR BLACK
-#define TEXT_COLOR BLACK
-#define BLACK_COLOR BLACK
-#define WHITE_COLOR WHITE
-#define MOVE_COLOR YELLOW
-
-// Game over
-#define GAME_OVER_DELAY 1.25
-#define GAME_OVER_FONT_SIZE 40
-#define GAME_OVER_MESSAGE "GAME OVER!"
-#define TIE_MESSAGE "IT'S A TIE!"
-#define WHITE_WINS_MESSAGE "WHITE WINS!"
-#define BLACK_WINS_MESSAGE "BLACK WINS!"
+#include <config.h>
 
 int GetScreenSize(void)
 {
