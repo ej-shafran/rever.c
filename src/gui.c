@@ -39,7 +39,7 @@ Rectangle GetSquareRec(size_t y, size_t x)
 
 void DrawSquare(RevercContext ctx, size_t y, size_t x)
 {
-	Rectangle rec = GetSquareRec(x, y);
+	Rectangle rec = GetSquareRec(y, x);
 	float stoneRadius = (rec.width / 2) - 5;
 	int centerX = rec.x + (rec.width / 2);
 	int centerY = rec.y + (rec.height / 2);
