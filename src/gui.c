@@ -12,30 +12,27 @@ int GetBoardSize(void)
 	return width > height ? height : width;
 }
 
-int GetSquareSize(void)
+int GetCellSize(void)
 {
 	return GetBoardSize() / BOARD_SIZE;
 }
 
-Rectangle GetSquareRec(size_t y, size_t x)
+Rectangle GetCellRec(size_t y, size_t x)
 {
+	int cellSize = GetCellSize();
 	int boardSize = GetBoardSize();
-	int squareSize = GetSquareSize();
 	int paddingX = (GetScreenWidth() - boardSize) / 2;
 	int paddingY = (GetScreenHeight() - boardSize) / 2;
-	int pixelX = (x * squareSize) + paddingX;
-	int pixelY = (y * squareSize) + paddingY;
 
-	Rectangle rec = { .x = pixelX,
-			  .y = pixelY,
-			  .width = squareSize,
-			  .height = squareSize };
-	return rec;
+	return (Rectangle){ .x = (x * cellSize) + paddingX,
+			    .y = (y * cellSize) + paddingY,
+			    .width = cellSize,
+			    .height = cellSize };
 }
 
-void DrawSquare(RevercContext ctx, size_t y, size_t x)
+void DrawCell(RevercContext ctx, size_t y, size_t x)
 {
-	Rectangle rec = GetSquareRec(y, x);
+	Rectangle rec = GetCellRec(y, x);
 	float stoneRadius = (rec.width / 2) - 5;
 	int centerX = rec.x + (rec.width / 2);
 	int centerY = rec.y + (rec.height / 2);
@@ -59,7 +56,7 @@ void DrawBoard(RevercContext ctx)
 {
 	for (size_t y = 0; y < BOARD_SIZE; ++y) {
 		for (size_t x = 0; x < BOARD_SIZE; ++x) {
-			DrawSquare(ctx, y, x);
+			DrawCell(ctx, y, x);
 		}
 	}
 }
@@ -68,7 +65,7 @@ bool DrawMove(RevercContext *ctx, size_t move_index)
 {
 	int x = ctx->moves[move_index].x;
 	int y = ctx->moves[move_index].y;
-	Rectangle rec = GetSquareRec(y, x);
+	Rectangle rec = GetCellRec(y, x);
 
 	float stoneRadius = ((float)rec.width / 2) - 5;
 	int centerX = rec.x + (rec.width / 2);
