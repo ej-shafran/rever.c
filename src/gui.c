@@ -2,11 +2,12 @@
 #include "reverc.h"
 #include <stdbool.h>
 
-#define SQUARE_SIZE 100
 #define COMPUTER_MOVE_DELAY 0.45
 #define GAME_OVER_DELAY 1.25
 
+#define DEFAULT_SCREEN_SIZE 800
 #define GAME_OVER_MESSAGE "GAME OVER!"
+#define SCREEN_TITLE "rever.c"
 
 int get_screen_size(void)
 {
@@ -122,7 +123,7 @@ int main(int argc, const char **argv)
 {
 	Reverc_Context ctx = reverc_context_new(argc, argv);
 
-	InitWindow(800, 800, "rever.c");
+	InitWindow(DEFAULT_SCREEN_SIZE, DEFAULT_SCREEN_SIZE, SCREEN_TITLE);
 
 	bool game_over = false;
 	ssize_t pending_computer_move = -1;
