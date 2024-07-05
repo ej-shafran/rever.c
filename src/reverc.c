@@ -21,8 +21,29 @@
 		}                                                              \
 	} while (0)
 
+// Internal declarations
+
+typedef struct {
+	uint64_t score;
+	size_t index;
+} ComputerMoveResult;
+
+static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
+					      size_t depth);
+static uint64_t CountBits(uint64_t n);
+static void CalculateMoveChanges(RevercContext ctx, Move *m);
+static void CalculateMoves(RevercContext *ctx);
+static uint64_t CalculatePositionScore(RevercContext ctx, bool isBlack,
+				       size_t depth);
+static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
+					      size_t depth);
+
+// Internal variables
+
 static int DIRECTIONS[8][2] = { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 },
 				{ 1, 1 },   { 1, 0 },  { 1, -1 }, { 0, -1 } };
+
+// Internal functions
 
 static uint64_t CountBits(uint64_t n)
 {
@@ -97,6 +118,39 @@ static void CalculateMoves(RevercContext *ctx)
 		}
 	}
 }
+
+static uint64_t CalculatePositionScore(RevercContext ctx, bool isBlack,
+				       size_t depth)
+{
+	if (depth >= MAX_DEPTH) {
+		uint64_t blackBits = CountBits(ctx.board.black);
+		uint64_t whiteBits = CountBits(ctx.board.white);
+		return isBlack ? blackBits - whiteBits : whiteBits - blackBits;
+	}
+
+	return GetBestComputerMove(ctx, isBlack, depth).score;
+}
+
+static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
+					      size_t depth)
+{
+	uint64_t bestScore = 0;
+	size_t bestIndex = 0;
+	for (size_t i = 0; i < ctx.movesCount; ++i) {
+		RevercContext clone = CloneContext(ctx);
+		MakeMove(&clone, i + 1);
+		uint64_t score =
+			CalculatePositionScore(clone, isBlack, depth + 1);
+		if (score > bestScore) {
+			bestScore = score;
+			bestIndex = i;
+		}
+	}
+
+	return (ComputerMoveResult){ .index = bestIndex, .score = bestScore };
+}
+
+// Public functions
 
 RevercContext NewContext(int argc, const char **argv)
 {
@@ -180,45 +234,6 @@ CellState GetWinner(RevercContext ctx)
 	} else {
 		return CELL_EMPTY;
 	}
-}
-
-typedef struct {
-	uint64_t score;
-	size_t index;
-} ComputerMoveResult;
-
-static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
-					      size_t depth);
-
-static uint64_t CalculatePositionScore(RevercContext ctx, bool isBlack,
-				       size_t depth)
-{
-	if (depth >= MAX_DEPTH) {
-		uint64_t blackBits = CountBits(ctx.board.black);
-		uint64_t whiteBits = CountBits(ctx.board.white);
-		return isBlack ? blackBits - whiteBits : whiteBits - blackBits;
-	}
-
-	return GetBestComputerMove(ctx, isBlack, depth).score;
-}
-
-static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
-					      size_t depth)
-{
-	uint64_t bestScore = 0;
-	size_t bestIndex = 0;
-	for (size_t i = 0; i < ctx.movesCount; ++i) {
-		RevercContext clone = CloneContext(ctx);
-		MakeMove(&clone, i + 1);
-		uint64_t score =
-			CalculatePositionScore(clone, isBlack, depth + 1);
-		if (score > bestScore) {
-			bestScore = score;
-			bestIndex = i;
-		}
-	}
-
-	return (ComputerMoveResult){ .index = bestIndex, .score = bestScore };
 }
 
 size_t GetComputerMoveIndex(RevercContext ctx)
