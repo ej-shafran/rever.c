@@ -124,7 +124,7 @@ bool PlayerMove(RevercContext *ctx)
 		char *endptr = NULL;
 		size_t moveNumber = strtoul(command, &endptr, 10);
 
-		if (*endptr != '\0' || !MakeMove(ctx, moveNumber))
+		if (*endptr != '\0' || !MakeMove(ctx, moveNumber - 1))
 			fprintf(stderr, "Invalid move.\n");
 	} else {
 		fprintf(stderr, "Invalid command '%s'\n", command);
@@ -165,7 +165,7 @@ int main(int argc, const char **argv)
 			if (PlayerMove(&ctx))
 				break;
 		} else {
-			MakeMove(&ctx, GetComputerMoveIndex(ctx) + 1);
+			 MakeMove(&ctx, GetComputerMoveIndex(ctx));
 		}
 	}
 

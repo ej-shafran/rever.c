@@ -3,3 +3,8 @@
 * DONE Introduce GNU build system
   CLOSED: [2024-06-23 Sun 15:09]
 
+* DONE Pass move index as opposed to move number
+  CLOSED: [2024-07-06 Sat 00:30]
+
+* TODO Fix two-player for gui
+

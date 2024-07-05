@@ -142,7 +142,7 @@ static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
 	size_t bestIndex = 0;
 	for (size_t i = 0; i < ctx.movesCount; ++i) {
 		RevercContext clone = CloneContext(ctx);
-		MakeMove(&clone, i + 1);
+		MakeMove(&clone, i);
 		uint64_t score =
 			CalculatePositionScore(clone, isBlack, depth + 1);
 		if (score > bestScore) {
@@ -216,13 +216,13 @@ bool IsPlayerMove(RevercContext ctx)
 	return ctx.isTwoPlayer || ctx.isBlack == ctx.playerIsBlack;
 }
 
-bool MakeMove(RevercContext *ctx, size_t moveNumber)
+bool MakeMove(RevercContext *ctx, size_t moveIndex)
 {
-	if (moveNumber == 0 || moveNumber - 1 >= ctx->movesCount)
+	if (moveIndex >= ctx->movesCount)
 		return false;
 
 	CellState self = ctx->isBlack ? CELL_BLACK : CELL_WHITE;
-	Move m = ctx->moves[moveNumber - 1];
+	Move m = ctx->moves[moveIndex];
 	SET_BOARD_AT(ctx->board, m.y, m.x, self);
 	for (size_t i = 0; i < m.changesCount; ++i) {
 		SET_BOARD_AT(ctx->board, m.changes[i][0], m.changes[i][1],

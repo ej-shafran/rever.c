@@ -68,7 +68,7 @@ ParseError GetParseError(void);
 RevercContext CloneContext(RevercContext other);
 size_t GetComputerMoveIndex(RevercContext ctx);
 bool IsPlayerMove(RevercContext ctx);
-bool MakeMove(RevercContext *ctx, size_t moveNumber);
+bool MakeMove(RevercContext *ctx, size_t moveIndex);
 CellState GetWinner(RevercContext ctx);
 
 #endif // REVERC_H_

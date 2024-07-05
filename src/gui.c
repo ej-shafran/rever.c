@@ -61,10 +61,10 @@ void DrawBoard(RevercContext ctx)
 	}
 }
 
-bool DrawMove(RevercContext *ctx, size_t move_index)
+bool DrawMove(RevercContext *ctx, size_t moveIndex)
 {
-	int x = ctx->moves[move_index].x;
-	int y = ctx->moves[move_index].y;
+	int x = ctx->moves[moveIndex].x;
+	int y = ctx->moves[moveIndex].y;
 	Rectangle rec = GetCellRec(y, x);
 
 	float stoneRadius = ((float)rec.width / 2) - 5;
@@ -78,7 +78,7 @@ bool DrawMove(RevercContext *ctx, size_t move_index)
 
 	if (inBoundsX && inBoundsY &&
 	    IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-		MakeMove(ctx, move_index + 1);
+		MakeMove(ctx, moveIndex);
 		return true;
 	}
 
@@ -159,7 +159,7 @@ int main(int argc, const char **argv)
 		if (pendingComputerMove != -1) {
 			timer += GetFrameTime();
 			if (timer > COMPUTER_MOVE_DELAY) {
-				MakeMove(&ctx, pendingComputerMove + 1);
+				MakeMove(&ctx, pendingComputerMove);
 				pendingComputerMove = -1;
 				timer = 0;
 			}
