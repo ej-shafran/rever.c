@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <config.h>
 
-int GetScreenSize(void)
+int GetBoardSize(void)
 {
 	int width = GetScreenWidth();
 	int height = GetScreenHeight();
@@ -14,14 +14,15 @@ int GetScreenSize(void)
 
 int GetSquareSize(void)
 {
-	return GetScreenSize() / BOARD_SIZE;
+	return GetBoardSize() / BOARD_SIZE;
 }
 
 Rectangle GetSquareRec(size_t y, size_t x)
 {
+	int boardSize = GetBoardSize();
 	int squareSize = GetSquareSize();
-	int paddingX = (GetScreenWidth() - GetScreenSize()) / 2;
-	int paddingY = (GetScreenHeight() - GetScreenSize()) / 2;
+	int paddingX = (GetScreenWidth() - boardSize) / 2;
+	int paddingY = (GetScreenHeight() - boardSize) / 2;
 	int pixelX = (x * squareSize) + paddingX;
 	int pixelY = (y * squareSize) + paddingY;
 
