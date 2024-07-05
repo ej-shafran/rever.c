@@ -21,7 +21,7 @@ int get_square_size(void)
 	return get_screen_size() / REVERC_BOARD_SIZE;
 }
 
-void draw_square(Reverc_Context ctx, size_t y, size_t x)
+Rectangle get_square_rec(size_t y, size_t x)
 {
 	int square_size = get_square_size();
 	int padding_x = (GetScreenWidth() - get_screen_size()) / 2;
@@ -33,17 +33,22 @@ void draw_square(Reverc_Context ctx, size_t y, size_t x)
 			  .y = pixel_y,
 			  .width = square_size,
 			  .height = square_size };
+	return rec;
+}
 
-	float stone_radius = ((float)square_size / 2) - 5;
-	int center_x = pixel_x + (square_size / 2);
-	int center_y = pixel_y + (square_size / 2);
+void draw_square(Reverc_Context ctx, size_t y, size_t x)
+{
+	Rectangle rec = get_square_rec(x, y);
+	float stone_radius = (rec.width / 2) - 5;
+	int center_x = rec.x + (rec.width / 2);
+	int center_y = rec.y + (rec.height / 2);
 
 	DrawRectangleLinesEx(rec, 3, BLACK);
 
 	Reverc_CellState cell = GET_CELL_AT(ctx, y, x);
 	switch (cell) {
-	case REVERC_CELL_STATE_EMPTY:
-		break;
+	case REVERC_CELL_STATE_EMPTY: {
+	} break;
 	case REVERC_CELL_STATE_WHITE: {
 		DrawCircle(center_x, center_y, stone_radius, WHITE);
 	} break;
@@ -64,24 +69,19 @@ void draw_board(Reverc_Context ctx)
 
 bool draw_move(Reverc_Context *ctx, size_t move_index)
 {
-	int square_size = get_square_size();
 	int x = ctx->moves[move_index].x;
 	int y = ctx->moves[move_index].y;
-	int padding_x = (GetScreenWidth() - get_screen_size()) / 2;
-	int padding_y = (GetScreenHeight() - get_screen_size()) / 2;
-	int pixel_x = (x * square_size) + padding_x;
-	int pixel_y = (y * square_size) + padding_y;
+	Rectangle rec = get_square_rec(y, x);
 
-	float stone_radius = ((float)square_size / 2) - 5;
-	int center_x = pixel_x + (square_size / 2);
-	int center_y = pixel_y + (square_size / 2);
+	float stone_radius = ((float)rec.width / 2) - 5;
+	int center_x = rec.x + (rec.width / 2);
+	int center_y = rec.y + (rec.height / 2);
 	DrawCircle(center_x, center_y, stone_radius, YELLOW);
 
 	Vector2 mouse = GetMousePosition();
-	bool in_bounds_x = mouse.x >= pixel_x &&
-			   mouse.x < pixel_x + square_size;
-	bool in_bounds_y = mouse.y >= pixel_y &&
-			   mouse.y < pixel_y + square_size;
+	bool in_bounds_x = mouse.x >= rec.x && mouse.x < rec.x + rec.width;
+	bool in_bounds_y = mouse.y >= rec.y && mouse.y < rec.y + rec.height;
+
 	if (in_bounds_x && in_bounds_y &&
 	    IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		reverc_make_move(ctx, move_index + 1);
