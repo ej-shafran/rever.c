@@ -8,25 +8,23 @@
 
 #define MAX_DEPTH 4
 
-#define SET_BOARD_AT(board, y, x, state)                                      \
-	do {                                                                  \
-		if (state == REVERC_CELL_STATE_BLACK) {                       \
-			(board).black |=                                      \
-				(1ULL << (((y) * REVERC_BOARD_SIZE) + (x)));  \
-			(board).white &=                                      \
-				~(1ULL << (((y) * REVERC_BOARD_SIZE) + (x))); \
-		} else if (state == REVERC_CELL_STATE_WHITE) {                \
-			(board).white |=                                      \
-				(1ULL << (((y) * REVERC_BOARD_SIZE) + (x)));  \
-			(board).black &=                                      \
-				~(1ULL << (((y) * REVERC_BOARD_SIZE) + (x))); \
-		}                                                             \
+#define SET_BOARD_AT(board, y, x, state)                                       \
+	do {                                                                   \
+		if (state == CELL_BLACK) {                                     \
+			(board).black |= (1ULL << (((y) * BOARD_SIZE) + (x))); \
+			(board).white &=                                       \
+				~(1ULL << (((y) * BOARD_SIZE) + (x)));         \
+		} else if (state == CELL_WHITE) {                              \
+			(board).white |= (1ULL << (((y) * BOARD_SIZE) + (x))); \
+			(board).black &=                                       \
+				~(1ULL << (((y) * BOARD_SIZE) + (x)));         \
+		}                                                              \
 	} while (0)
 
 static int DIRECTIONS[8][2] = { { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 },
 				{ 1, 1 },   { 1, 0 },  { 1, -1 }, { 0, -1 } };
 
-static uint64_t count_bits(uint64_t n)
+static uint64_t CountBits(uint64_t n)
 {
 	uint64_t c = n - ((n >> 1) & 0x7777777777777777ULL) -
 		     ((n >> 2) & 0x3333333333333333ULL) -
@@ -36,199 +34,194 @@ static uint64_t count_bits(uint64_t n)
 	return c >> 56;
 }
 
-static void calculate_move_changes(Reverc_Context ctx, Reverc_Move *m)
+static void CalculateMoveChanges(RevercContext ctx, Move *m)
 {
-	Reverc_CellState other = ctx.is_black ? REVERC_CELL_STATE_WHITE :
-						REVERC_CELL_STATE_BLACK;
+	CellState other = ctx.isBlack ? CELL_WHITE : CELL_BLACK;
 
 	for (size_t i = 0; i < 8; i++) {
 		int dy = DIRECTIONS[i][0];
 		int dx = DIRECTIONS[i][1];
 
-		size_t changes[REVERC_BOARD_SIZE - 1][2] = { 0 };
-		size_t changes_count = 0;
-		bool seen_other = false;
+		size_t changes[BOARD_SIZE - 1][2] = { 0 };
+		size_t changesCount = 0;
+		bool seenOther = false;
 		for (int x = m->x + dx, y = m->y + dy;
-		     x >= 0 && x < REVERC_BOARD_SIZE && y >= 0 &&
-		     y < REVERC_BOARD_SIZE;
+		     x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE;
 		     x += dx, y += dy) {
-			Reverc_CellState cell = GET_CELL_AT(ctx, y, x);
+			CellState cell = GET_CELL_AT(ctx, y, x);
 
-			if (cell == REVERC_CELL_STATE_EMPTY)
+			if (cell == CELL_EMPTY)
 				break;
 
 			if (cell == other) {
-				seen_other = true;
-				changes[changes_count][0] = y;
-				changes[changes_count++][1] = x;
+				seenOther = true;
+				changes[changesCount][0] = y;
+				changes[changesCount++][1] = x;
 				continue;
 			}
 
-			if (!seen_other)
+			if (!seenOther)
 				break;
 
-			for (size_t i = 0; i < changes_count; ++i) {
-				m->changes[m->changes_count + i][0] =
+			for (size_t i = 0; i < changesCount; ++i) {
+				m->changes[m->changesCount + i][0] =
 					changes[i][0];
-				m->changes[m->changes_count + i][1] =
+				m->changes[m->changesCount + i][1] =
 					changes[i][1];
 			}
-			m->changes_count += changes_count;
+			m->changesCount += changesCount;
 			break;
 		}
 	}
 }
 
-static void calculate_moves(Reverc_Context *ctx)
+static void CalculateMoves(RevercContext *ctx)
 {
-	ctx->move_count = 0;
+	ctx->movesCount = 0;
 
-	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
-		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
-			if (GET_CELL_AT(*ctx, y, x) != REVERC_CELL_STATE_EMPTY)
+	for (size_t y = 0; y < BOARD_SIZE; ++y) {
+		for (size_t x = 0; x < BOARD_SIZE; ++x) {
+			if (GET_CELL_AT(*ctx, y, x) != CELL_EMPTY)
 				continue;
 
-			Reverc_Move m = {
+			Move m = {
 				.x = x,
 				.y = y,
-				.changes_count = 0,
+				.changesCount = 0,
 				.changes = { 0 },
 			};
-			calculate_move_changes(*ctx, &m);
-			if (m.changes_count > 0) {
-				ctx->moves[ctx->move_count++] = m;
+			CalculateMoveChanges(*ctx, &m);
+			if (m.changesCount > 0) {
+				ctx->moves[ctx->movesCount++] = m;
 			}
 		}
 	}
 }
 
-Reverc_Context reverc_context_new(int argc, const char **argv)
+RevercContext NewContext(int argc, const char **argv)
 {
-	bool is_two_player = false;
-	bool player_is_black = true;
+	bool isTwoPlayer = false;
+	bool playerIsBlack = true;
 	argc -= 1;
 	argv += 1;
 	for (int i = 0; i < argc; ++i) {
 		if (strcmp(argv[i], "--two-player") == 0) {
-			is_two_player = true;
+			isTwoPlayer = true;
 		} else if (strcmp(argv[i], "--play-as-white") == 0) {
-			if (is_two_player) {
+			if (isTwoPlayer) {
 				REVERC_WARNING(
 					"--play-as-white has no meaning when passing --two-player");
 				continue;
 			}
 
-			player_is_black = false;
+			playerIsBlack = false;
 		} else {
 			REVERC_WARNING("unrecognized argument '%s'", argv[i]);
 		}
 	}
 
-	Reverc_Context ctx = {
-		.is_black = true,
+	RevercContext ctx = {
+		.isBlack = true,
 		.board = { .black = 0x810000000, .white = 0x1008000000 },
-		.is_two_player = is_two_player,
-		.player_is_black = player_is_black,
+		.isTwoPlayer = isTwoPlayer,
+		.playerIsBlack = playerIsBlack,
 		.moves = { 0 },
-		.move_count = 0,
+		.movesCount = 0,
 	};
 
-	calculate_moves(&ctx);
+	CalculateMoves(&ctx);
 
 	return ctx;
 }
 
-Reverc_Context reverc_context_clone(Reverc_Context other)
+RevercContext CloneContext(RevercContext other)
 {
-	Reverc_Context ctx = { 0 };
-	ctx.is_black = other.is_black;
-	ctx.move_count = other.move_count;
+	RevercContext ctx = { 0 };
+	ctx.isBlack = other.isBlack;
+	ctx.movesCount = other.movesCount;
 	ctx.board.white = other.board.white;
 	ctx.board.black = other.board.black;
-	for (size_t i = 0; i < other.move_count; ++i) {
+	for (size_t i = 0; i < other.movesCount; ++i) {
 		ctx.moves[i] = other.moves[i];
 	}
 	return ctx;
 }
 
-bool reverc_is_player_move(Reverc_Context ctx)
+bool IsPlayerMove(RevercContext ctx)
 {
-	return ctx.is_two_player || ctx.is_black == ctx.player_is_black;
+	return ctx.isTwoPlayer || ctx.isBlack == ctx.playerIsBlack;
 }
 
-bool reverc_make_move(Reverc_Context *ctx, size_t move_number)
+bool MakeMove(RevercContext *ctx, size_t moveNumber)
 {
-	if (move_number == 0 || move_number - 1 >= ctx->move_count)
+	if (moveNumber == 0 || moveNumber - 1 >= ctx->movesCount)
 		return false;
 
-	Reverc_CellState self = ctx->is_black ? REVERC_CELL_STATE_BLACK :
-						REVERC_CELL_STATE_WHITE;
-	Reverc_Move m = ctx->moves[move_number - 1];
+	CellState self = ctx->isBlack ? CELL_BLACK : CELL_WHITE;
+	Move m = ctx->moves[moveNumber - 1];
 	SET_BOARD_AT(ctx->board, m.y, m.x, self);
-	for (size_t i = 0; i < m.changes_count; ++i) {
+	for (size_t i = 0; i < m.changesCount; ++i) {
 		SET_BOARD_AT(ctx->board, m.changes[i][0], m.changes[i][1],
 			     self);
 	}
-	ctx->is_black = !ctx->is_black;
-	calculate_moves(ctx);
+	ctx->isBlack = !ctx->isBlack;
+	CalculateMoves(ctx);
 	return true;
 }
 
-Reverc_CellState reverc_winner(Reverc_Context ctx)
+CellState GetWinner(RevercContext ctx)
 {
-	size_t white_count = count_bits(ctx.board.white);
-	size_t black_count = count_bits(ctx.board.black);
-	if (black_count > white_count) {
-		return REVERC_CELL_STATE_BLACK;
-	} else if (white_count > black_count) {
-		return REVERC_CELL_STATE_WHITE;
+	size_t whiteCount = CountBits(ctx.board.white);
+	size_t blackCount = CountBits(ctx.board.black);
+	if (blackCount > whiteCount) {
+		return CELL_BLACK;
+	} else if (whiteCount > blackCount) {
+		return CELL_WHITE;
 	} else {
-		return REVERC_CELL_STATE_EMPTY;
+		return CELL_EMPTY;
 	}
 }
 
 typedef struct {
-	uint64_t best_score;
-	size_t best_index;
+	uint64_t score;
+	size_t index;
 } ComputerMoveResult;
 
-ComputerMoveResult get_computer_move_impl(Reverc_Context ctx, bool is_black,
-					  size_t depth);
+static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
+					      size_t depth);
 
-uint64_t calculate_position_score(Reverc_Context ctx, bool is_black,
-				  size_t depth)
+static uint64_t CalculatePositionScore(RevercContext ctx, bool isBlack,
+				       size_t depth)
 {
 	if (depth >= MAX_DEPTH) {
-		uint64_t black_bits = count_bits(ctx.board.black);
-		uint64_t white_bits = count_bits(ctx.board.white);
-		return is_black ? black_bits - white_bits :
-				  white_bits - black_bits;
+		uint64_t blackBits = CountBits(ctx.board.black);
+		uint64_t whiteBits = CountBits(ctx.board.white);
+		return isBlack ? blackBits - whiteBits : whiteBits - blackBits;
 	}
 
-	return get_computer_move_impl(ctx, is_black, depth).best_score;
+	return GetBestComputerMove(ctx, isBlack, depth).score;
 }
 
-ComputerMoveResult get_computer_move_impl(Reverc_Context ctx, bool is_black,
-					  size_t depth)
+static ComputerMoveResult GetBestComputerMove(RevercContext ctx, bool isBlack,
+					      size_t depth)
 {
-	uint64_t best_score = 0;
-	size_t best_index = 0;
-	for (size_t i = 0; i < ctx.move_count; ++i) {
-		Reverc_Context clone = reverc_context_clone(ctx);
-		reverc_make_move(&clone, i + 1);
-		uint64_t worth =
-			calculate_position_score(clone, is_black, depth + 1);
-		if (worth > best_score) {
-			best_score = worth;
-			best_index = i;
+	uint64_t bestScore = 0;
+	size_t bestIndex = 0;
+	for (size_t i = 0; i < ctx.movesCount; ++i) {
+		RevercContext clone = CloneContext(ctx);
+		MakeMove(&clone, i + 1);
+		uint64_t score =
+			CalculatePositionScore(clone, isBlack, depth + 1);
+		if (score > bestScore) {
+			bestScore = score;
+			bestIndex = i;
 		}
 	}
 
-	return (ComputerMoveResult){ .best_index = best_index,
-				     .best_score = best_score };
+	return (ComputerMoveResult){ .index = bestIndex, .score = bestScore };
 }
 
-size_t reverc_get_computer_move_index(Reverc_Context ctx)
+size_t GetComputerMoveIndex(RevercContext ctx)
 {
-	return get_computer_move_impl(ctx, ctx.is_black, 0).best_index;
+	return GetBestComputerMove(ctx, ctx.isBlack, 0).index;
 }

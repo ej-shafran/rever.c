@@ -19,7 +19,7 @@ int GetScreenSize(void)
 
 int GetSquareSize(void)
 {
-	return GetScreenSize() / REVERC_BOARD_SIZE;
+	return GetScreenSize() / BOARD_SIZE;
 }
 
 Rectangle GetSquareRec(size_t y, size_t x)
@@ -37,7 +37,7 @@ Rectangle GetSquareRec(size_t y, size_t x)
 	return rec;
 }
 
-void DrawSquare(Reverc_Context ctx, size_t y, size_t x)
+void DrawSquare(RevercContext ctx, size_t y, size_t x)
 {
 	Rectangle rec = GetSquareRec(x, y);
 	float stoneRadius = (rec.width / 2) - 5;
@@ -46,29 +46,29 @@ void DrawSquare(Reverc_Context ctx, size_t y, size_t x)
 
 	DrawRectangleLinesEx(rec, 3, BLACK);
 
-	Reverc_CellState cell = GET_CELL_AT(ctx, y, x);
+	CellState cell = GET_CELL_AT(ctx, y, x);
 	switch (cell) {
-	case REVERC_CELL_STATE_EMPTY: {
+	case CELL_EMPTY: {
 	} break;
-	case REVERC_CELL_STATE_WHITE: {
+	case CELL_WHITE: {
 		DrawCircle(centerX, centerY, stoneRadius, WHITE);
 	} break;
-	case REVERC_CELL_STATE_BLACK: {
+	case CELL_BLACK: {
 		DrawCircle(centerX, centerY, stoneRadius, BLACK);
 	} break;
 	}
 }
 
-void DrawBoard(Reverc_Context ctx)
+void DrawBoard(RevercContext ctx)
 {
-	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
-		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
+	for (size_t y = 0; y < BOARD_SIZE; ++y) {
+		for (size_t x = 0; x < BOARD_SIZE; ++x) {
 			DrawSquare(ctx, y, x);
 		}
 	}
 }
 
-bool DrawMove(Reverc_Context *ctx, size_t move_index)
+bool DrawMove(RevercContext *ctx, size_t move_index)
 {
 	int x = ctx->moves[move_index].x;
 	int y = ctx->moves[move_index].y;
@@ -85,14 +85,14 @@ bool DrawMove(Reverc_Context *ctx, size_t move_index)
 
 	if (inBoundsX && inBoundsY &&
 	    IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-		reverc_make_move(ctx, move_index + 1);
+		MakeMove(ctx, move_index + 1);
 		return true;
 	}
 
 	return false;
 }
 
-void DrawGameOver(Reverc_Context ctx)
+void DrawGameOver(RevercContext ctx)
 {
 	int screenWidth = GetScreenWidth();
 	int screenHeight = GetScreenHeight();
@@ -101,16 +101,16 @@ void DrawGameOver(Reverc_Context ctx)
 	DrawText(GAME_OVER_MESSAGE, (screenWidth / 2) - (width / 2),
 		 screenHeight / 2 - 40, fontSize, BLACK);
 
-	Reverc_CellState winner = reverc_winner(ctx);
+	CellState winner = GetWinner(ctx);
 	const char *winsMessage;
 	switch (winner) {
-	case REVERC_CELL_STATE_EMPTY: {
+	case CELL_EMPTY: {
 		winsMessage = "IT'S A TIE!";
 	} break;
-	case REVERC_CELL_STATE_WHITE: {
+	case CELL_WHITE: {
 		winsMessage = "WHITE WINS!";
 	} break;
-	case REVERC_CELL_STATE_BLACK: {
+	case CELL_BLACK: {
 		winsMessage = "BLACK WINS!";
 	} break;
 	}
@@ -121,7 +121,7 @@ void DrawGameOver(Reverc_Context ctx)
 
 int main(int argc, const char **argv)
 {
-	Reverc_Context ctx = reverc_context_new(argc, argv);
+	RevercContext ctx = NewContext(argc, argv);
 
 	InitWindow(DEFAULT_SCREEN_SIZE, DEFAULT_SCREEN_SIZE, SCREEN_TITLE);
 
@@ -138,7 +138,7 @@ int main(int argc, const char **argv)
 			goto _next;
 		}
 
-		if (ctx.move_count == 0) {
+		if (ctx.movesCount == 0) {
 			timer += GetFrameTime();
 			if (timer > GAME_OVER_DELAY) {
 				gameOver = true;
@@ -151,17 +151,17 @@ int main(int argc, const char **argv)
 		if (pendingComputerMove != -1) {
 			timer += GetFrameTime();
 			if (timer > COMPUTER_MOVE_DELAY) {
-				reverc_make_move(&ctx, pendingComputerMove + 1);
+				MakeMove(&ctx, pendingComputerMove + 1);
 				pendingComputerMove = -1;
 				timer = 0;
 			}
 			goto _next;
 		}
 
-		for (size_t i = 0; i < ctx.move_count; ++i) {
+		for (size_t i = 0; i < ctx.movesCount; ++i) {
 			if (DrawMove(&ctx, i)) {
 				pendingComputerMove =
-					reverc_get_computer_move_index(ctx);
+					GetComputerMoveIndex(ctx);
 				break;
 			}
 		}

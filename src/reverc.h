@@ -5,18 +5,18 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define REVERC_BOARD_SIZE 8
+#define BOARD_SIZE 8
 // https://jxiv.jst.go.jp/index.php/jxiv/preprint/download/480/1498/1315
-#define REVERC_MAX_MOVE_COUNT 33
+#define MAX_MOVE_COUNT 33
 
 #define BLACK_AT(board, y, x) \
-	((board).black & (1ULL << (((y) * REVERC_BOARD_SIZE) + (x))))
+	((board).black & (1ULL << (((y) * BOARD_SIZE) + (x))))
 #define WHITE_AT(board, y, x) \
-	((board).white & (1ULL << (((y) * REVERC_BOARD_SIZE) + (x))))
-#define GET_CELL_AT(ctx, y, x)                                   \
-	(BLACK_AT((ctx).board, y, x) ? REVERC_CELL_STATE_BLACK : \
-	 WHITE_AT((ctx).board, y, x) ? REVERC_CELL_STATE_WHITE : \
-				       REVERC_CELL_STATE_EMPTY)
+	((board).white & (1ULL << (((y) * BOARD_SIZE) + (x))))
+#define GET_CELL_AT(ctx, y, x)                      \
+	(BLACK_AT((ctx).board, y, x) ? CELL_BLACK : \
+	 WHITE_AT((ctx).board, y, x) ? CELL_WHITE : \
+				       CELL_EMPTY)
 
 #ifdef INCLUDE_RAYLIB
 #include "raylib.h"
@@ -32,40 +32,40 @@
 #endif // REVERC_WARNING
 
 typedef enum {
-	REVERC_CELL_STATE_EMPTY,
-	REVERC_CELL_STATE_WHITE,
-	REVERC_CELL_STATE_BLACK,
-} Reverc_CellState;
+	CELL_EMPTY,
+	CELL_WHITE,
+	CELL_BLACK,
+} CellState;
 
 typedef struct {
 	uint64_t black;
 	uint64_t white;
-} Reverc_Board;
+} Board;
 
 typedef struct {
 	size_t x;
 	size_t y;
 
-	size_t changes[REVERC_BOARD_SIZE * REVERC_BOARD_SIZE - 1][2];
-	size_t changes_count;
-} Reverc_Move;
+	size_t changes[BOARD_SIZE * BOARD_SIZE - 1][2];
+	size_t changesCount;
+} Move;
 
 typedef struct {
-	bool is_black;
-	bool is_two_player;
-	bool player_is_black;
+	bool isBlack;
+	bool isTwoPlayer;
+	bool playerIsBlack;
 
-	Reverc_Board board;
+	Board board;
 
-	size_t move_count;
-	Reverc_Move moves[REVERC_MAX_MOVE_COUNT];
-} Reverc_Context;
+	size_t movesCount;
+	Move moves[MAX_MOVE_COUNT];
+} RevercContext;
 
-Reverc_Context reverc_context_new(int argc, const char **argv);
-Reverc_Context reverc_context_clone(Reverc_Context other);
-size_t reverc_get_computer_move_index(Reverc_Context ctx);
-bool reverc_is_player_move(Reverc_Context ctx);
-bool reverc_make_move(Reverc_Context *ctx, size_t move_number);
-Reverc_CellState reverc_winner(Reverc_Context ctx);
+RevercContext NewContext(int argc, const char **argv);
+RevercContext CloneContext(RevercContext other);
+size_t GetComputerMoveIndex(RevercContext ctx);
+bool IsPlayerMove(RevercContext ctx);
+bool MakeMove(RevercContext *ctx, size_t moveNumber);
+CellState GetWinner(RevercContext ctx);
 
 #endif // REVERC_H_

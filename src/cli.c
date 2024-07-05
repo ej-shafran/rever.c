@@ -14,28 +14,28 @@ static int exitCode = 0;
 		goto _end;       \
 	} while (0)
 
-bool PrintBoard(Reverc_Context ctx)
+bool PrintBoard(RevercContext ctx)
 {
 	printf("┌");
-	for (size_t i = 0; i < REVERC_BOARD_SIZE; i++) {
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		for (size_t j = 0; j < 4; j++)
 			printf("─");
-		if (i + 1 != REVERC_BOARD_SIZE)
+		if (i + 1 != BOARD_SIZE)
 			printf("┬");
 	}
 	printf("┐\n");
-	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
-		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
+	for (size_t y = 0; y < BOARD_SIZE; ++y) {
+		for (size_t x = 0; x < BOARD_SIZE; ++x) {
 			if (x > 0)
 				printf(" │ ");
 			else
 				printf("│ ");
 
 			switch (GET_CELL_AT(ctx, y, x)) {
-			case REVERC_CELL_STATE_EMPTY: {
+			case CELL_EMPTY: {
 				ssize_t move = -1;
-				for (size_t i = 0; i < ctx.move_count; ++i) {
-					Reverc_Move m = ctx.moves[i];
+				for (size_t i = 0; i < ctx.movesCount; ++i) {
+					Move m = ctx.moves[i];
 					if (m.x == x && m.y == y) {
 						move = i;
 						break;
@@ -48,48 +48,48 @@ bool PrintBoard(Reverc_Context ctx)
 					printf("%2zu", move + 1);
 				}
 			} break;
-			case REVERC_CELL_STATE_WHITE: {
+			case CELL_WHITE: {
 				printf("⚪");
 			} break;
-			case REVERC_CELL_STATE_BLACK: {
+			case CELL_BLACK: {
 				printf("⚫");
 			} break;
 			}
 		}
 		printf(" │\n");
 
-		if (y + 1 != REVERC_BOARD_SIZE) {
+		if (y + 1 != BOARD_SIZE) {
 			printf("├");
-			for (size_t i = 0; i < REVERC_BOARD_SIZE; i++) {
+			for (size_t i = 0; i < BOARD_SIZE; i++) {
 				for (size_t j = 0; j < 4; j++)
 					printf("─");
-				if (i + 1 != REVERC_BOARD_SIZE)
+				if (i + 1 != BOARD_SIZE)
 					printf("┼");
 			}
 			printf("┤\n");
 		}
 	}
 	printf("└");
-	for (size_t i = 0; i < REVERC_BOARD_SIZE; i++) {
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		for (size_t j = 0; j < 4; j++)
 			printf("─");
-		if (i + 1 != REVERC_BOARD_SIZE)
+		if (i + 1 != BOARD_SIZE)
 			printf("┴");
 	}
 	printf("┘\n");
 
-	if (ctx.move_count > 0) {
+	if (ctx.movesCount > 0) {
 		printf("%s's turn (%zu moves)\n",
-		       ctx.is_black ? "Black" : "White", ctx.move_count);
+		       ctx.isBlack ? "Black" : "White", ctx.movesCount);
 		return true;
 	}
 
 	printf("GAME OVER!\n");
 
-	Reverc_CellState winner = reverc_winner(ctx);
-	if (winner == REVERC_CELL_STATE_BLACK) {
+	CellState winner = GetWinner(ctx);
+	if (winner == CELL_BLACK) {
 		printf("BLACK WINS!\n");
-	} else if (winner == REVERC_CELL_STATE_WHITE) {
+	} else if (winner == CELL_WHITE) {
 		printf("WHITE WINS!\n");
 	} else {
 		printf("TIE!\n");
@@ -97,7 +97,7 @@ bool PrintBoard(Reverc_Context ctx)
 	return false;
 }
 
-bool PlayerMove(Reverc_Context *ctx)
+bool PlayerMove(RevercContext *ctx)
 {
 	bool quit = false;
 
@@ -124,7 +124,7 @@ bool PlayerMove(Reverc_Context *ctx)
 		char *endptr = NULL;
 		size_t moveNumber = strtoul(command, &endptr, 10);
 
-		if (*endptr != '\0' || !reverc_make_move(ctx, moveNumber))
+		if (*endptr != '\0' || !MakeMove(ctx, moveNumber))
 			fprintf(stderr, "Invalid move.\n");
 	} else {
 		fprintf(stderr, "Invalid command '%s'\n", command);
@@ -139,7 +139,7 @@ _end:
 
 int main(int argc, const char **argv)
 {
-	Reverc_Context ctx = reverc_context_new(argc, argv);
+	RevercContext ctx = NewContext(argc, argv);
 
 	printf("Type `help` for help\n");
 
@@ -148,12 +148,12 @@ int main(int argc, const char **argv)
 		if (!PrintBoard(ctx))
 			break;
 
-		if (reverc_is_player_move(ctx)) {
+		if (IsPlayerMove(ctx)) {
 			if (PlayerMove(&ctx))
 				break;
 		} else {
-			reverc_make_move(
-				&ctx, reverc_get_computer_move_index(ctx) + 1);
+			MakeMove(
+				&ctx, GetComputerMoveIndex(ctx) + 1);
 		}
 	}
 
