@@ -5,16 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int exitcode = 0;
+static int exitCode = 0;
 
 #define MAIN_LOOP_QUIT(code)     \
 	do {                     \
 		quit = true;     \
-		exitcode = code; \
+		exitCode = code; \
 		goto _end;       \
 	} while (0)
 
-bool print_board(Reverc_Context ctx)
+bool PrintBoard(Reverc_Context ctx)
 {
 	printf("┌");
 	for (size_t i = 0; i < REVERC_BOARD_SIZE; i++) {
@@ -97,7 +97,7 @@ bool print_board(Reverc_Context ctx)
 	return false;
 }
 
-bool player_move(Reverc_Context *ctx)
+bool PlayerMove(Reverc_Context *ctx)
 {
 	bool quit = false;
 
@@ -108,7 +108,7 @@ bool player_move(Reverc_Context *ctx)
 	if (nread < 0 || command[nread - 1] != '\n') {
 		fprintf(stderr, "\nFailed to read from stdin\n");
 		quit = true;
-		exitcode = 1;
+		exitCode = 1;
 		goto _end;
 	}
 	command[nread - 1] = '\0';
@@ -122,9 +122,9 @@ bool player_move(Reverc_Context *ctx)
 		printf("  quit - exit the game immediately\n");
 	} else if (isdigit(command[0])) {
 		char *endptr = NULL;
-		size_t move_number = strtoul(command, &endptr, 10);
+		size_t moveNumber = strtoul(command, &endptr, 10);
 
-		if (*endptr != '\0' || !reverc_make_move(ctx, move_number))
+		if (*endptr != '\0' || !reverc_make_move(ctx, moveNumber))
 			fprintf(stderr, "Invalid move.\n");
 	} else {
 		fprintf(stderr, "Invalid command '%s'\n", command);
@@ -145,11 +145,11 @@ int main(int argc, const char **argv)
 
 	bool quit = false;
 	while (!quit) {
-		if (!print_board(ctx))
+		if (!PrintBoard(ctx))
 			break;
 
 		if (reverc_is_player_move(ctx)) {
-			if (player_move(&ctx))
+			if (PlayerMove(&ctx))
 				break;
 		} else {
 			reverc_make_move(
@@ -157,5 +157,5 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	return exitcode;
+	return exitCode;
 }
