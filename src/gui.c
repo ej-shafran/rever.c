@@ -9,7 +9,7 @@
 #define GAME_OVER_MESSAGE "GAME OVER!"
 #define SCREEN_TITLE "rever.c"
 
-int get_screen_size(void)
+int GetScreenSize(void)
 {
 	int width = GetScreenWidth();
 	int height = GetScreenHeight();
@@ -17,32 +17,32 @@ int get_screen_size(void)
 	return width > height ? height : width;
 }
 
-int get_square_size(void)
+int GetSquareSize(void)
 {
-	return get_screen_size() / REVERC_BOARD_SIZE;
+	return GetScreenSize() / REVERC_BOARD_SIZE;
 }
 
-Rectangle get_square_rec(size_t y, size_t x)
+Rectangle GetSquareRec(size_t y, size_t x)
 {
-	int square_size = get_square_size();
-	int padding_x = (GetScreenWidth() - get_screen_size()) / 2;
-	int padding_y = (GetScreenHeight() - get_screen_size()) / 2;
-	int pixel_x = (x * square_size) + padding_x;
-	int pixel_y = (y * square_size) + padding_y;
+	int squareSize = GetSquareSize();
+	int paddingX = (GetScreenWidth() - GetScreenSize()) / 2;
+	int paddingY = (GetScreenHeight() - GetScreenSize()) / 2;
+	int pixelX = (x * squareSize) + paddingX;
+	int pixelY = (y * squareSize) + paddingY;
 
-	Rectangle rec = { .x = pixel_x,
-			  .y = pixel_y,
-			  .width = square_size,
-			  .height = square_size };
+	Rectangle rec = { .x = pixelX,
+			  .y = pixelY,
+			  .width = squareSize,
+			  .height = squareSize };
 	return rec;
 }
 
-void draw_square(Reverc_Context ctx, size_t y, size_t x)
+void DrawSquare(Reverc_Context ctx, size_t y, size_t x)
 {
-	Rectangle rec = get_square_rec(x, y);
-	float stone_radius = (rec.width / 2) - 5;
-	int center_x = rec.x + (rec.width / 2);
-	int center_y = rec.y + (rec.height / 2);
+	Rectangle rec = GetSquareRec(x, y);
+	float stoneRadius = (rec.width / 2) - 5;
+	int centerX = rec.x + (rec.width / 2);
+	int centerY = rec.y + (rec.height / 2);
 
 	DrawRectangleLinesEx(rec, 3, BLACK);
 
@@ -51,39 +51,39 @@ void draw_square(Reverc_Context ctx, size_t y, size_t x)
 	case REVERC_CELL_STATE_EMPTY: {
 	} break;
 	case REVERC_CELL_STATE_WHITE: {
-		DrawCircle(center_x, center_y, stone_radius, WHITE);
+		DrawCircle(centerX, centerY, stoneRadius, WHITE);
 	} break;
 	case REVERC_CELL_STATE_BLACK: {
-		DrawCircle(center_x, center_y, stone_radius, BLACK);
+		DrawCircle(centerX, centerY, stoneRadius, BLACK);
 	} break;
 	}
 }
 
-void draw_board(Reverc_Context ctx)
+void DrawBoard(Reverc_Context ctx)
 {
 	for (size_t y = 0; y < REVERC_BOARD_SIZE; ++y) {
 		for (size_t x = 0; x < REVERC_BOARD_SIZE; ++x) {
-			draw_square(ctx, y, x);
+			DrawSquare(ctx, y, x);
 		}
 	}
 }
 
-bool draw_move(Reverc_Context *ctx, size_t move_index)
+bool DrawMove(Reverc_Context *ctx, size_t move_index)
 {
 	int x = ctx->moves[move_index].x;
 	int y = ctx->moves[move_index].y;
-	Rectangle rec = get_square_rec(y, x);
+	Rectangle rec = GetSquareRec(y, x);
 
-	float stone_radius = ((float)rec.width / 2) - 5;
-	int center_x = rec.x + (rec.width / 2);
-	int center_y = rec.y + (rec.height / 2);
-	DrawCircle(center_x, center_y, stone_radius, YELLOW);
+	float stoneRadius = ((float)rec.width / 2) - 5;
+	int centerX = rec.x + (rec.width / 2);
+	int centerY = rec.y + (rec.height / 2);
+	DrawCircle(centerX, centerY, stoneRadius, YELLOW);
 
 	Vector2 mouse = GetMousePosition();
-	bool in_bounds_x = mouse.x >= rec.x && mouse.x < rec.x + rec.width;
-	bool in_bounds_y = mouse.y >= rec.y && mouse.y < rec.y + rec.height;
+	bool inBoundsX = mouse.x >= rec.x && mouse.x < rec.x + rec.width;
+	bool inBoundsY = mouse.y >= rec.y && mouse.y < rec.y + rec.height;
 
-	if (in_bounds_x && in_bounds_y &&
+	if (inBoundsX && inBoundsY &&
 	    IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		reverc_make_move(ctx, move_index + 1);
 		return true;
@@ -92,31 +92,31 @@ bool draw_move(Reverc_Context *ctx, size_t move_index)
 	return false;
 }
 
-void draw_game_over(Reverc_Context ctx)
+void DrawGameOver(Reverc_Context ctx)
 {
-	int screen_width = GetScreenWidth();
-	int screen_height = GetScreenHeight();
-	int font_size = 40;
-	int width = MeasureText(GAME_OVER_MESSAGE, font_size);
-	DrawText(GAME_OVER_MESSAGE, (screen_width / 2) - (width / 2),
-		 screen_height / 2 - 40, font_size, BLACK);
+	int screenWidth = GetScreenWidth();
+	int screenHeight = GetScreenHeight();
+	int fontSize = 40;
+	int width = MeasureText(GAME_OVER_MESSAGE, fontSize);
+	DrawText(GAME_OVER_MESSAGE, (screenWidth / 2) - (width / 2),
+		 screenHeight / 2 - 40, fontSize, BLACK);
 
 	Reverc_CellState winner = reverc_winner(ctx);
-	const char *wins_message;
+	const char *winsMessage;
 	switch (winner) {
 	case REVERC_CELL_STATE_EMPTY: {
-		wins_message = "IT'S A TIE!";
+		winsMessage = "IT'S A TIE!";
 	} break;
 	case REVERC_CELL_STATE_WHITE: {
-		wins_message = "WHITE WINS!";
+		winsMessage = "WHITE WINS!";
 	} break;
 	case REVERC_CELL_STATE_BLACK: {
-		wins_message = "BLACK WINS!";
+		winsMessage = "BLACK WINS!";
 	} break;
 	}
-	width = MeasureText(wins_message, font_size);
-	DrawText(wins_message, (screen_width / 2) - (width / 2),
-		 screen_height / 2 + 20, font_size, BLACK);
+	width = MeasureText(winsMessage, fontSize);
+	DrawText(winsMessage, (screenWidth / 2) - (width / 2),
+		 screenHeight / 2 + 20, fontSize, BLACK);
 }
 
 int main(int argc, const char **argv)
@@ -125,43 +125,42 @@ int main(int argc, const char **argv)
 
 	InitWindow(DEFAULT_SCREEN_SIZE, DEFAULT_SCREEN_SIZE, SCREEN_TITLE);
 
-	bool game_over = false;
-	ssize_t pending_computer_move = -1;
+	bool gameOver = false;
+	ssize_t pendingComputerMove = -1;
 	float timer = 0;
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 
 		ClearBackground(DARKGREEN);
 
-		if (game_over) {
-			draw_game_over(ctx);
+		if (gameOver) {
+			DrawGameOver(ctx);
 			goto _next;
 		}
 
 		if (ctx.move_count == 0) {
 			timer += GetFrameTime();
 			if (timer > GAME_OVER_DELAY) {
-				game_over = true;
+				gameOver = true;
 			}
-			draw_board(ctx);
+			DrawBoard(ctx);
 		}
 
-		draw_board(ctx);
+		DrawBoard(ctx);
 
-		if (pending_computer_move != -1) {
+		if (pendingComputerMove != -1) {
 			timer += GetFrameTime();
 			if (timer > COMPUTER_MOVE_DELAY) {
-				reverc_make_move(&ctx,
-						 pending_computer_move + 1);
-				pending_computer_move = -1;
+				reverc_make_move(&ctx, pendingComputerMove + 1);
+				pendingComputerMove = -1;
 				timer = 0;
 			}
 			goto _next;
 		}
 
 		for (size_t i = 0; i < ctx.move_count; ++i) {
-			if (draw_move(&ctx, i)) {
-				pending_computer_move =
+			if (DrawMove(&ctx, i)) {
+				pendingComputerMove =
 					reverc_get_computer_move_index(ctx);
 				break;
 			}
