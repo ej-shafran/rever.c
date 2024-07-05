@@ -2,12 +2,28 @@
 #include "reverc.h"
 #include <stdbool.h>
 
+// Computer moves
 #define COMPUTER_MOVE_DELAY 0.45
-#define GAME_OVER_DELAY 1.25
 
+// Screen/window
 #define DEFAULT_SCREEN_SIZE 800
-#define GAME_OVER_MESSAGE "GAME OVER!"
 #define SCREEN_TITLE "rever.c"
+
+// Colors
+#define BACKGROUND_COLOR DARKGREEN
+#define LINE_COLOR BLACK
+#define TEXT_COLOR BLACK
+#define BLACK_COLOR BLACK
+#define WHITE_COLOR WHITE
+#define MOVE_COLOR YELLOW
+
+// Game over
+#define GAME_OVER_DELAY 1.25
+#define GAME_OVER_FONT_SIZE 40
+#define GAME_OVER_MESSAGE "GAME OVER!"
+#define TIE_MESSAGE "IT'S A TIE!"
+#define WHITE_WINS_MESSAGE "WHITE WINS!"
+#define BLACK_WINS_MESSAGE "BLACK WINS!"
 
 int GetScreenSize(void)
 {
@@ -44,17 +60,17 @@ void DrawSquare(RevercContext ctx, size_t y, size_t x)
 	int centerX = rec.x + (rec.width / 2);
 	int centerY = rec.y + (rec.height / 2);
 
-	DrawRectangleLinesEx(rec, 3, BLACK);
+	DrawRectangleLinesEx(rec, 3, LINE_COLOR);
 
 	CellState cell = GET_CELL_AT(ctx, y, x);
 	switch (cell) {
 	case CELL_EMPTY: {
 	} break;
 	case CELL_WHITE: {
-		DrawCircle(centerX, centerY, stoneRadius, WHITE);
+		DrawCircle(centerX, centerY, stoneRadius, WHITE_COLOR);
 	} break;
 	case CELL_BLACK: {
-		DrawCircle(centerX, centerY, stoneRadius, BLACK);
+		DrawCircle(centerX, centerY, stoneRadius, BLACK_COLOR);
 	} break;
 	}
 }
@@ -77,7 +93,7 @@ bool DrawMove(RevercContext *ctx, size_t move_index)
 	float stoneRadius = ((float)rec.width / 2) - 5;
 	int centerX = rec.x + (rec.width / 2);
 	int centerY = rec.y + (rec.height / 2);
-	DrawCircle(centerX, centerY, stoneRadius, YELLOW);
+	DrawCircle(centerX, centerY, stoneRadius, MOVE_COLOR);
 
 	Vector2 mouse = GetMousePosition();
 	bool inBoundsX = mouse.x >= rec.x && mouse.x < rec.x + rec.width;
@@ -96,27 +112,27 @@ void DrawGameOver(RevercContext ctx)
 {
 	int screenWidth = GetScreenWidth();
 	int screenHeight = GetScreenHeight();
-	int fontSize = 40;
-	int width = MeasureText(GAME_OVER_MESSAGE, fontSize);
+	int width = MeasureText(GAME_OVER_MESSAGE, GAME_OVER_FONT_SIZE);
 	DrawText(GAME_OVER_MESSAGE, (screenWidth / 2) - (width / 2),
-		 screenHeight / 2 - 40, fontSize, BLACK);
+		 screenHeight / 2 - GAME_OVER_FONT_SIZE, GAME_OVER_FONT_SIZE,
+		 TEXT_COLOR);
 
 	CellState winner = GetWinner(ctx);
 	const char *winsMessage;
 	switch (winner) {
 	case CELL_EMPTY: {
-		winsMessage = "IT'S A TIE!";
+		winsMessage = TIE_MESSAGE;
 	} break;
 	case CELL_WHITE: {
-		winsMessage = "WHITE WINS!";
+		winsMessage = WHITE_WINS_MESSAGE;
 	} break;
 	case CELL_BLACK: {
-		winsMessage = "BLACK WINS!";
+		winsMessage = BLACK_WINS_MESSAGE;
 	} break;
 	}
-	width = MeasureText(winsMessage, fontSize);
+	width = MeasureText(winsMessage, GAME_OVER_FONT_SIZE);
 	DrawText(winsMessage, (screenWidth / 2) - (width / 2),
-		 screenHeight / 2 + 20, fontSize, BLACK);
+		 screenHeight / 2 + 20, GAME_OVER_FONT_SIZE, TEXT_COLOR);
 }
 
 int main(int argc, const char **argv)
@@ -131,7 +147,7 @@ int main(int argc, const char **argv)
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 
-		ClearBackground(DARKGREEN);
+		ClearBackground(BACKGROUND_COLOR);
 
 		if (gameOver) {
 			DrawGameOver(ctx);
@@ -160,8 +176,7 @@ int main(int argc, const char **argv)
 
 		for (size_t i = 0; i < ctx.movesCount; ++i) {
 			if (DrawMove(&ctx, i)) {
-				pendingComputerMove =
-					GetComputerMoveIndex(ctx);
+				pendingComputerMove = GetComputerMoveIndex(ctx);
 				break;
 			}
 		}
